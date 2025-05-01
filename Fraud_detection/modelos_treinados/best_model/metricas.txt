@@ -1,0 +1,8 @@
+Métricas do melhor modelo: XGBoost
+
+Acurácia: 0.9984
+Precisão: 0.8442
+Recall: 0.8463
+F1-score: 0.8453
+ROC AUC: 0.9985
+AUC Precision-Recall: 0.9167
