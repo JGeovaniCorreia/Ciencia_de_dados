@@ -46,12 +46,12 @@ class OneHotEncoderTransformer(BaseEstimator, TransformerMixin):
 
 # Classe para transformação Yeo-Johnson
 class YeoJohnsonTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, variables=None):
+    def __init__(self, variaveis=None):
         """
         Classe para aplicar a transformação Yeo-Johnson nas variáveis específicas.
-        :param variables: lista de variáveis para aplicar a transformação. Se None, aplica a todas as variáveis numéricas.
+         lista de variáveis para aplicar a transformação. Se None, aplica a todas as variáveis numéricas.
         """
-        self.variables = variables
+        self.variaveis = variaveis
         self.transformer = PowerTransformer(method='yeo-johnson', standardize=False)  # Yeo-Johnson sem padronização
     
     def fit(self, X, y=None):
@@ -61,20 +61,20 @@ class YeoJohnsonTransformer(BaseEstimator, TransformerMixin):
         :param y: Ignorado (necessário para compatibilidade com pipeline).
         """
         # Se a lista de variáveis for None, aplica a transformação em todas as colunas numéricas
-        if self.variables is None:
-            self.variables = X.select_dtypes(include=['number']).columns.tolist()
+        if self.variaveis is None:
+            self.variaveis = X.select_dtypes(include=['number']).columns.tolist()
 
         # Verifica se todas as variáveis existem no DataFrame
-        missing_vars = [var for var in self.variables if var not in X.columns]
+        missing_vars = [var for var in self.variaveis if var not in X.columns]
         if missing_vars:
             raise ValueError(f"As seguintes variáveis não existem no DataFrame: {', '.join(missing_vars)}")
 
         # Verifica e remove valores ausentes (NaN)
-        if X[self.variables].isnull().any().any():
+        if X[self.variaveis].isnull().any().any():
             raise ValueError("Existem valores ausentes nas variáveis selecionadas. Por favor, trate-os antes de aplicar a transformação.")
         
         # Ajusta o transformer com os dados das variáveis selecionadas
-        self.transformer.fit(X[self.variables])
+        self.transformer.fit(X[self.variaveis])
         return self
     
     def transform(self, X):
@@ -84,13 +84,13 @@ class YeoJohnsonTransformer(BaseEstimator, TransformerMixin):
         :return: DataFrame com as variáveis transformadas.
         """
         # Verifica se as variáveis foram previamente definidas
-        if not self.variables:
+        if not self.variaveis:
             raise ValueError("Nenhuma variável definida para transformação.")
         
         X_transformed = X.copy()
 
         # Aplica a transformação nas variáveis selecionadas
-        X_transformed[self.variables] = self.transformer.transform(X[self.variables])
+        X_transformed[self.variaveis] = self.transformer.transform(X[self.variaveis])
         return X_transformed
     
     def fit_transform(self, X, y=None):
