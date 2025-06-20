@@ -1,7 +1,7 @@
 Metricas do melhor modelo: XGBoost
 
-ROC AUC: 0.8721
-AUC PR: 0.6993
-Brier Score: 0.1026
-Log Loss: 0.3365
-ECE: 0.027
+ROC AUC: 0.9922
+AUC PR: 0.977
+Brier Score: 0.0242
+Log Loss: 0.0817
+ECE: 0.0043

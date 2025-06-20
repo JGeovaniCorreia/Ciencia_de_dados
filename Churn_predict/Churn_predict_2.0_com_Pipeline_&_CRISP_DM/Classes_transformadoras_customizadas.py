@@ -86,6 +86,22 @@ class OrdinalEncoderTransformer(BaseEstimator, TransformerMixin):
 
     def get_feature_names_out(self, input_features=None):
         return np.array(self.feature_names_out_)
+    
+
+# === PassThrough - variaveis sem tratamento ===
+class PassThroughTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, columns=None):
+        self.columns = columns
+        
+    def fit(self, X, y=None):
+        return self
+    
+    def transform(self, X):
+        # Retorna apenas as colunas selecionadas, sem alteração
+        return X[self.columns].copy()
+    
+    def get_feature_names_out(self, input_features=None):
+        return self.columns    
 
 
 # === FEATURE ENGINEERING ===
@@ -101,18 +117,18 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
     def transform(self, X):
         X = X.copy()
 
-        X['CreditScore_Bin'] = pd.cut(X['CreditScore'], bins=[0, 580, 670, 800, np.inf], labels=['Muito Baixo', 'Baixo', 'Médio', 'Alto'])
+        X['CreditScore_Bin'] = pd.cut(X['CreditScore'],bins=[0, 584, 718, np.inf],labels=['Baixo', 'Médio', 'Alto'])
         X['Age_Bin'] = pd.cut(X['Age'], bins=[18, 30, 50, 80, np.inf], labels=['Jovem', 'Adulto', 'Idoso', 'Muito Idoso'], right=True, include_lowest=True)
         X['Score_padron_z_score_por_faixa'] = X.groupby('Age_Bin')['CreditScore'].transform(lambda x: (x - x.mean()) / x.std())
-        X['Tenure_Age_Ratio_zscore'] = X.groupby('Age_Bin')['Tenure'].transform(lambda x: (x - x.mean()) / x.std())
-        X['Balance_flag'] = (X['Balance'] > 0).astype(int)
+        #X['Tenure_Age_Ratio_zscore'] = X.groupby('Age_Bin')['Tenure'].transform(lambda x: (x - x.mean()) / x.std())
+        #X['Balance_flag'] = (X['Balance'] > 0).astype(int)
         X['Salary_Level'] = pd.cut(X['EstimatedSalary'], bins=[0, 50000, 100000, 150000, 200000], labels=['Baixo', 'Médio', 'Alto', 'Muito Alto'], right=True, include_lowest=True)
-        X['Balance_z_score_por_SalaryLevel'] = X.groupby('Salary_Level')['Balance'].transform(lambda x: (x - x.mean()) / x.std())
+        #X['Balance_z_score_por_SalaryLevel'] = X.groupby('Salary_Level')['Balance'].transform(lambda x: (x - x.mean()) / x.std())
         X['High_Product_Active'] = ((X['NumOfProducts'] >= 2) & (X['IsActiveMember'] == 1)).astype(int)
         X['Complain_NoSolution'] = ((X['Complain'] == 1) & (X['Satisfaction Score'] < 5)).astype(int)
         X['Points_per_Product_zscored'] = X.groupby('NumOfProducts')['Point Earned'].transform(lambda x: (x - x.mean()) / x.std())
 
         return X
-
+    
     def get_feature_names_out(self, input_features=None):
         return np.array(self.feature_names_out_)
