@@ -6,6 +6,7 @@
 # Importando as bibliotecas necessárias
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
+from sklearn.impute import SimpleImputer
 import pandas as pd
 import numpy as np
 
@@ -16,20 +17,27 @@ class RemoveColunas(BaseEstimator, TransformerMixin):
         self.colunas_para_remover = colunas_para_remover or []
 
     def fit(self, X, y=None):
+        X = self._check_dataframe(X)
         self.feature_names_out_ = [col for col in X.columns if col not in self.colunas_para_remover]
         return self
 
     def transform(self, X):
+        X = self._check_dataframe(X)
         return X.drop(columns=self.colunas_para_remover, errors='ignore')
 
     def get_feature_names_out(self, input_features=None):
         return np.array(self.feature_names_out_)
 
+    def _check_dataframe(self, X):
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("Este transformador espera um DataFrame como entrada.")
+        return X
+
 
 # === ONE HOT ENCODER TRANSFORMER ===
 class OneHotEncoderTransformer(BaseEstimator, TransformerMixin):
     def __init__(self):
-        self.encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
+        self.encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
 
     def fit(self, X, y=None):
         self.encoder.fit(X)
@@ -44,13 +52,39 @@ class OneHotEncoderTransformer(BaseEstimator, TransformerMixin):
         return self.feature_names_out_
 
 
-# === OUTLIER TRANSFORMER ===
+# === ORDINAL ENCODER TRANSFORMER ===
+class OrdinalEncoderTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        self.encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
+
+    def fit(self, X, y=None):
+        X = self._check_dataframe(X)
+        self.encoder.fit(X)
+        self.feature_names_out_ = X.columns
+        return self
+
+    def transform(self, X):
+        X = self._check_dataframe(X)
+        encoded = self.encoder.transform(X)
+        return pd.DataFrame(encoded, columns=self.feature_names_out_, index=X.index)
+
+    def get_feature_names_out(self, input_features=None):
+        return np.array(self.feature_names_out_)
+
+    def _check_dataframe(self, X):
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("OrdinalEncoderTransformer espera um DataFrame como entrada.")
+        return X
+
+
+# === OUTLIER FLAG TRANSFORMER ===
 class OutlierPercentilFlagTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, limites=(0.01, 0.01)):
         self.limites = limites
         self.percentis_ = None
 
     def fit(self, X, y=None):
+        X = self._check_dataframe(X)
         self.percentis_ = {}
         for col in X.select_dtypes(include=[np.number]).columns:
             p_inf = X[col].quantile(self.limites[0])
@@ -60,6 +94,7 @@ class OutlierPercentilFlagTransformer(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
+        X = self._check_dataframe(X)
         X_outliers = X.copy()
         for col, (p_inf, p_sup) in self.percentis_.items():
             nova_coluna = f'{col}_outlier'
@@ -69,39 +104,58 @@ class OutlierPercentilFlagTransformer(BaseEstimator, TransformerMixin):
     def get_feature_names_out(self, input_features=None):
         return np.array(self.feature_names_out_)
 
+    def _check_dataframe(self, X):
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("OutlierPercentilFlagTransformer espera um DataFrame como entrada.")
+        return X
 
-# === ORDINAL ENCODER TRANSFORMER ===
-class OrdinalEncoderTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self):
-        self.encoder = OrdinalEncoder()
+
+# === PassThrough - variáveis sem transformação ===
+class PassThroughTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, columns=None):
+        self.columns = columns
 
     def fit(self, X, y=None):
-        self.encoder.fit(X)
+        X = self._check_dataframe(X)
+        return self
+
+    def transform(self, X):
+        X = self._check_dataframe(X)
+        return X[self.columns].copy()
+
+    def get_feature_names_out(self, input_features=None):
+        return self.columns
+
+    def _check_dataframe(self, X):
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("PassThroughTransformer espera um DataFrame como entrada.")
+        return X
+
+
+# === SIMPLE IMPUTER TRANSFORMER ===
+class SimpleImputerTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, strategy='median'):
+        self.strategy = strategy
+        self.imputer = SimpleImputer(strategy=self.strategy)
+
+    def fit(self, X, y=None):
+        X = self._check_dataframe(X)
+        self.imputer.fit(X)
         self.feature_names_out_ = X.columns
         return self
 
     def transform(self, X):
-        encoded = self.encoder.transform(X)
-        return pd.DataFrame(encoded, columns=self.feature_names_out_, index=X.index)
+        X = self._check_dataframe(X)
+        imputed_array = self.imputer.transform(X)
+        return pd.DataFrame(imputed_array, columns=self.feature_names_out_, index=X.index)
 
     def get_feature_names_out(self, input_features=None):
         return np.array(self.feature_names_out_)
-    
 
-# === PassThrough - variaveis sem tratamento ===
-class PassThroughTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, columns=None):
-        self.columns = columns
-        
-    def fit(self, X, y=None):
-        return self
-    
-    def transform(self, X):
-        # Retorna apenas as colunas selecionadas, sem alteração
-        return X[self.columns].copy()
-    
-    def get_feature_names_out(self, input_features=None):
-        return self.columns    
+    def _check_dataframe(self, X):
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("SimpleImputerTransformer espera um DataFrame como entrada.")
+        return X
 
 
 # === FEATURE ENGINEERING ===
@@ -110,25 +164,39 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
         self.feature_names_out_ = None
 
     def fit(self, X, y=None):
-        X_transformed = self.transform(X.copy())  # aplica as transformações
+        X = self._check_dataframe(X)
+        X_transformed = self.transform(X.copy())
         self.feature_names_out_ = X_transformed.columns
         return self
 
     def transform(self, X):
-        X = X.copy()
-
+        X = self._check_dataframe(X).copy()
+        
         X['CreditScore_Bin'] = pd.cut(X['CreditScore'],bins=[0, 584, 718, np.inf],labels=['Baixo', 'Médio', 'Alto'])
-        X['Age_Bin'] = pd.cut(X['Age'], bins=[18, 30, 50, 80, np.inf], labels=['Jovem', 'Adulto', 'Idoso', 'Muito Idoso'], right=True, include_lowest=True)
-        X['Score_padron_z_score_por_faixa'] = X.groupby('Age_Bin')['CreditScore'].transform(lambda x: (x - x.mean()) / x.std())
+        #X['Age_Bin'] = pd.cut(X['Age'], bins=[18, 30, 50, 80, np.inf], labels=['Jovem', 'Adulto', 'Idoso', 'Muito Idoso'], right=True, include_lowest=True)
+        #X['Score_padron_z_score_por_faixa'] = X.groupby('Age_Bin')['CreditScore'].transform(lambda x: (x - x.mean()) / x.std())
         #X['Tenure_Age_Ratio_zscore'] = X.groupby('Age_Bin')['Tenure'].transform(lambda x: (x - x.mean()) / x.std())
         #X['Balance_flag'] = (X['Balance'] > 0).astype(int)
-        X['Salary_Level'] = pd.cut(X['EstimatedSalary'], bins=[0, 50000, 100000, 150000, 200000], labels=['Baixo', 'Médio', 'Alto', 'Muito Alto'], right=True, include_lowest=True)
+        #X['Salary_Level'] = pd.cut(X['EstimatedSalary'], bins=[0, 50000, 100000, 150000, 200000], labels=['Baixo', 'Médio', 'Alto', 'Muito Alto'], right=True, include_lowest=True)
         #X['Balance_z_score_por_SalaryLevel'] = X.groupby('Salary_Level')['Balance'].transform(lambda x: (x - x.mean()) / x.std())
-        X['High_Product_Active'] = ((X['NumOfProducts'] >= 2) & (X['IsActiveMember'] == 1)).astype(int)
-        X['Complain_NoSolution'] = ((X['Complain'] == 1) & (X['Satisfaction Score'] < 5)).astype(int)
-        X['Points_per_Product_zscored'] = X.groupby('NumOfProducts')['Point Earned'].transform(lambda x: (x - x.mean()) / x.std())
+        #X['High_Product_Active'] = ((X['NumOfProducts'] >= 2) & (X['IsActiveMember'] == 1)).astype(int)
+        #X['Complain_NoSolution'] = ((X['Complain'] == 1) & (X['Satisfaction Score'] < 5)).astype(int)
+        #X['Points_per_Product_zscored'] = X.groupby('NumOfProducts')['Point Earned'].transform(lambda x: (x - x.mean()) / x.std())
 
         return X
-    
+
     def get_feature_names_out(self, input_features=None):
         return np.array(self.feature_names_out_)
+
+    def _check_dataframe(self, X):
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError("FeatureEngineeringTransformer espera um DataFrame como entrada.")
+        return X
+
+
+
+
+
+    
+
+
