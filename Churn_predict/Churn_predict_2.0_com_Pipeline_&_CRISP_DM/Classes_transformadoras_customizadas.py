@@ -1,9 +1,9 @@
 
 '''AQUI CONTEM AS CLASSES TRANSFORMADAORAS USADAS NO PIPELINE DO MODELO,
- DEVEM SER DEPOSITADO JUNTO DA PASTA DO PKL DO MODELO PAR QUE POSSAM SER ACESSADAS
+ DEVEM SER DEPOSITADO JUNTO DA PASTA DO PKL DO MODELO PARA QUE POSSAM SER ACESSADAS
 '''
 
-# Importando as bibliotecas necessárias
+# bibliotecas necessarias para as classes
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 from sklearn.impute import SimpleImputer
@@ -13,6 +13,11 @@ import numpy as np
 
 # === REMOVE COLUNAS ===
 class RemoveColunas(BaseEstimator, TransformerMixin):
+
+    '''
+    Classe que remove colunas específicas do DataFrame, conforme lista informada.
+
+    '''
     def __init__(self, colunas_para_remover=None):
         self.colunas_para_remover = colunas_para_remover or []
 
@@ -36,6 +41,11 @@ class RemoveColunas(BaseEstimator, TransformerMixin):
 
 # === ONE HOT ENCODER TRANSFORMER ===
 class OneHotEncoderTransformer(BaseEstimator, TransformerMixin):
+
+    '''
+    Classe que aplica One-Hot Encoding, transformando categorias em colunas binárias (0 ou 1).
+
+    '''
     def __init__(self):
         self.encoder = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
 
@@ -54,6 +64,13 @@ class OneHotEncoderTransformer(BaseEstimator, TransformerMixin):
 
 # === ORDINAL ENCODER TRANSFORMER ===
 class OrdinalEncoderTransformer(BaseEstimator, TransformerMixin):
+
+    '''
+    Classe que aplica codificação ordinal em variáveis categóricas, atribuindo números inteiros às categorias. 
+    Útil para variaveis categoricas que guardam informacao ordinal relevante.
+
+    '''
+
     def __init__(self):
         self.encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
 
@@ -79,6 +96,12 @@ class OrdinalEncoderTransformer(BaseEstimator, TransformerMixin):
 
 # === OUTLIER FLAG TRANSFORMER ===
 class OutlierPercentilFlagTransformer(BaseEstimator, TransformerMixin):
+
+    '''
+    Classe que cria flags binárias de outliers com base em percentis definidos via parametro limites=(). 
+    Útil para sinalizar valores extremos sem alterar os dados originais.
+    ''' 
+
     def __init__(self, limites=(0.01, 0.01)):
         self.limites = limites
         self.percentis_ = None
@@ -112,6 +135,13 @@ class OutlierPercentilFlagTransformer(BaseEstimator, TransformerMixin):
 
 # === PassThrough - variáveis sem transformação ===
 class PassThroughTransformer(BaseEstimator, TransformerMixin):
+
+    ''' 
+   Classe que aplica PassThrough, ou seja, passa os valores sem alteraçao para o modelo, 
+   serve para variaveis que nao se deseja aplicar nenhuma trasnformacao via pipeline
+
+    '''
+        
     def __init__(self, columns=None):
         self.columns = columns
 
@@ -134,6 +164,12 @@ class PassThroughTransformer(BaseEstimator, TransformerMixin):
 
 # === SIMPLE IMPUTER TRANSFORMER ===
 class SimpleImputerTransformer(BaseEstimator, TransformerMixin):
+
+    ''' 
+   Classe que aplica simple imputer, técnica de pré-processamento que preenche 
+   valores ausentes em um dataset com uma estratégia simples, atraves do parametro strategy, que no caso é median
+    '''
+
     def __init__(self, strategy='median'):
         self.strategy = strategy
         self.imputer = SimpleImputer(strategy=self.strategy)
@@ -160,6 +196,13 @@ class SimpleImputerTransformer(BaseEstimator, TransformerMixin):
 
 # === FEATURE ENGINEERING ===
 class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
+
+    '''
+    classe que aplica engenharia de features a partir das variavies ja existentes
+
+    '''
+
+
     def __init__(self):
         self.feature_names_out_ = None
 
@@ -173,6 +216,12 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
         X = self._check_dataframe(X).copy()
         
         X['CreditScore_Bin'] = pd.cut(X['CreditScore'],bins=[0, 584, 718, np.inf],labels=['Baixo', 'Médio', 'Alto'])
+
+        ''' 
+        aqui sao variaveis que foram criadas e estudadas, mas que nao apresentaram ganho na predicao do evento em estudo; 
+        foram descartadas. Seus valores se restrigem a analise descritiva doevento apenas. 
+
+        '''
         #X['Age_Bin'] = pd.cut(X['Age'], bins=[18, 30, 50, 80, np.inf], labels=['Jovem', 'Adulto', 'Idoso', 'Muito Idoso'], right=True, include_lowest=True)
         #X['Score_padron_z_score_por_faixa'] = X.groupby('Age_Bin')['CreditScore'].transform(lambda x: (x - x.mean()) / x.std())
         #X['Tenure_Age_Ratio_zscore'] = X.groupby('Age_Bin')['Tenure'].transform(lambda x: (x - x.mean()) / x.std())

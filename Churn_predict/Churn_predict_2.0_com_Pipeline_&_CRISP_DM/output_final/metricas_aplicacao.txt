@@ -1,5 +1,7 @@
 Metricas da aplicacao do melhor modelo em Prod: XGBoost 
 
-Brier Score: 0.11
-Log Loss: 0.36
-ROC AUC: 0.84
+ROC AUC: 0.8437
+AUC PR: 0.6737
+Brier Score: 0.1081
+Log Loss: 0.3559
+ECE: 0.0122
