@@ -1,7 +1,7 @@
-Metricas do melhor modelo: XGBoost
+Metricas do melhor modelo: HistGb
 
-ROC AUC: 0.8592
-AUC PR: 0.7006
-Brier Score: 0.1033
-Log Loss: 0.3424
-ECE: 0.0204
+ROC AUC: 0.8657
+AUC PR: 0.7043
+Brier Score: 0.1032
+Log Loss: 0.3397
+ECE: 0.0255

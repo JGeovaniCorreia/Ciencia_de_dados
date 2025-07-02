@@ -67,12 +67,17 @@ class OrdinalEncoderTransformer(BaseEstimator, TransformerMixin):
 
     '''
     Classe que aplica codificação ordinal em variáveis categóricas, atribuindo números inteiros às categorias. 
-    Útil para variaveis categoricas que guardam informacao ordinal relevante.
-
+    Útil para variáveis categóricas que guardam informação ordinal relevante.
+    
+    Parâmetro:
+    - categories: lista de listas, onde cada lista define a ordem das categorias para cada variável.
+      Exemplo: categories=[['Baixo', 'Médio', 'Alto', 'Muito Alto']]
     '''
 
-    def __init__(self):
-        self.encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
+    def __init__(self, categories=None):
+        self.categories = categories
+        self.encoder = OrdinalEncoder(categories=categories,
+                                      handle_unknown='use_encoded_value', unknown_value=-1)
 
     def fit(self, X, y=None):
         X = self._check_dataframe(X)
@@ -225,11 +230,11 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
         #X['Age_Bin'] = pd.cut(X['Age'], bins=[18, 30, 50, 80, np.inf], labels=['Jovem', 'Adulto', 'Idoso', 'Muito Idoso'], right=True, include_lowest=True)
         #X['Score_padron_z_score_por_faixa'] = X.groupby('Age_Bin')['CreditScore'].transform(lambda x: (x - x.mean()) / x.std())
         #X['Tenure_Age_Ratio_zscore'] = X.groupby('Age_Bin')['Tenure'].transform(lambda x: (x - x.mean()) / x.std())
-        #X['Balance_flag'] = (X['Balance'] > 0).astype(int)
-        #X['Salary_Level'] = pd.cut(X['EstimatedSalary'], bins=[0, 50000, 100000, 150000, 200000], labels=['Baixo', 'Médio', 'Alto', 'Muito Alto'], right=True, include_lowest=True)
+        X['Balance_flag'] = (X['Balance'] > 0).astype(int)
+        X['Salary_Level'] = pd.cut(X['EstimatedSalary'], bins=[0, 50000, 100000, 150000, 200000], labels=['Baixo', 'Médio', 'Alto', 'Muito Alto'], right=True, include_lowest=True)
         #X['Balance_z_score_por_SalaryLevel'] = X.groupby('Salary_Level')['Balance'].transform(lambda x: (x - x.mean()) / x.std())
-        #X['High_Product_Active'] = ((X['NumOfProducts'] >= 2) & (X['IsActiveMember'] == 1)).astype(int)
-        #X['Complain_NoSolution'] = ((X['Complain'] == 1) & (X['Satisfaction Score'] < 5)).astype(int)
+        X['High_Product_Active'] = ((X['NumOfProducts'] >= 2) & (X['IsActiveMember'] == 1)).astype(int)
+        #X['Complain_NoSolution'] = ((X['Complain'] == 1) & (X['Satisfaction Score'] <=3)).astype(int)
         #X['Points_per_Product_zscored'] = X.groupby('NumOfProducts')['Point Earned'].transform(lambda x: (x - x.mean()) / x.std())
 
         return X
