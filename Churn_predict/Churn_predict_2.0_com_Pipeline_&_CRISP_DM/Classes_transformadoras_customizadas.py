@@ -5,7 +5,7 @@
 
 # bibliotecas necessarias para as classes
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder,FunctionTransformer
 from sklearn.impute import SimpleImputer
 import pandas as pd
 import numpy as np
@@ -246,6 +246,27 @@ class FeatureEngineeringTransformer(BaseEstimator, TransformerMixin):
         if not isinstance(X, pd.DataFrame):
             raise TypeError("FeatureEngineeringTransformer espera um DataFrame como entrada.")
         return X
+
+
+    # === TO DATAFRAME TRANSFORMER ===
+class ToDataFrameTransformer(BaseEstimator, TransformerMixin):
+    """
+    Transforma uma matriz NumPy de volta em um DataFrame Pandas,
+    restaurando os nomes das colunas (útil após imputações e transformações).
+    """
+
+    def __init__(self, columns=None):
+        self.columns = columns
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        return pd.DataFrame(X, columns=self.columns)
+
+    def get_feature_names_out(self, input_features=None):
+        return np.array(self.columns)
+
 
 
 
