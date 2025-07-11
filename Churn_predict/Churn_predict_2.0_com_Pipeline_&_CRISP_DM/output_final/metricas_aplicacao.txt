@@ -1,7 +1,7 @@
-Metricas da aplicacao do melhor modelo em Prod: HistGb 
+Metricas da aplicacao do melhor modelo em Prod: XGBoost 
 
-ROC AUC: 0.8540
-AUC PR: 0.6792
-Brier Score: 0.1071
-Log Loss: 0.3504
-ECE: 0.0163
+ROC AUC: 0.8517
+AUC PR: 0.6826
+Brier Score: 0.1065
+Log Loss: 0.3496
+ECE: 0.0123
