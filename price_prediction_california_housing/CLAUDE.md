@@ -124,3 +124,4 @@ For **Conformal Prediction intervals**, load `q_hats` from `artifacts/competitio
 
 - **Context limit warning**: When a session is approaching ~100k tokens (long notebook audits, multi-agent workflows, iterative edits), warn explicitly before continuing:
   > ⚠️ Esta sessão está se aproximando de 100k tokens. Considere `/compact` (comprime o histórico mantendo contexto) ou `/clear` (reinicia — use quando a tarefa atual terminou) antes de continuar.
+- **Git commits**: Use only the change description in commit messages. Never add co-author lines (`Co-Authored-By`) or any Claude attribution.
