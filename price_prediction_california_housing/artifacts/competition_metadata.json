@@ -1,0 +1,86 @@
+{
+  "competition_winner": "CatBoost",
+  "competing_models": [
+    "Ridge",
+    "XGBoost",
+    "LightGBM",
+    "CatBoost",
+    "TabNet"
+  ],
+  "tuner": "Optuna TPESampler (multivariate=True) + MedianPruner (boosting)",
+  "n_trials": {
+    "Ridge": 5,
+    "XGBoost": 5,
+    "LightGBM": 5,
+    "CatBoost": 5,
+    "TabNet": 5
+  },
+  "gpu_used": true,
+  "device": "cuda",
+  "training_date": "2026-05-08T03:07:07.663194",
+  "sklearn_version": "1.7.2",
+  "optuna_version": "4.8.0",
+  "python_version": "3.10.11",
+  "n_train_samples": 12384,
+  "n_cal_samples": 4128,
+  "n_test_samples": 4128,
+  "input_features": [
+    "RendaMediana",
+    "IdadeMediaResidencias",
+    "MediaComodos",
+    "MediaQuartos",
+    "Populacao",
+    "MediaOcupacao",
+    "Latitude",
+    "Longitude"
+  ],
+  "engineered_features": [
+    "RendaMediana",
+    "IdadeMediaResidencias",
+    "MediaComodos",
+    "MediaQuartos",
+    "Populacao",
+    "MediaOcupacao",
+    "Latitude",
+    "Longitude",
+    "razao_quartos",
+    "comodos_por_pessoa",
+    "dist_sf",
+    "dist_la",
+    "dist_sd"
+  ],
+  "target_column": "ValorMedioResidencias",
+  "target_transform": "np.log1p — reverter com np.expm1",
+  "target_unit": "$100k USD",
+  "conformal_q_hats": {
+    "0.8": 0.107861,
+    "0.9": 0.151516,
+    "0.95": 0.201622
+  },
+  "best_hyperparams": {
+    "iterations": "580",
+    "learning_rate": "0.1937550186412042",
+    "depth": "9",
+    "l2_leaf_reg": "0.005575453980775369",
+    "bagging_temperature": "0.8925589984899778",
+    "random_strength": "0.1436709513866423",
+    "border_count": "212"
+  },
+  "best_cv_r2": 0.8572,
+  "all_scores": {
+    "CatBoost": 0.9526,
+    "XGBoost": 0.9019,
+    "LightGBM": 0.7892,
+    "TabNet": 0.5889,
+    "Ridge": 0.1673
+  },
+  "metrics_test": {
+    "R2": 0.8654,
+    "RMSE_100k": 0.4445,
+    "MAE_100k": 0.2818,
+    "MAPE_pct": 15.37,
+    "IS_80pct": 1.5292,
+    "PICP_80pct": 0.7175,
+    "MACE": 0.0629
+  }
+}
