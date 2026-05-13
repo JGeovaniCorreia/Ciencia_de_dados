@@ -1,5 +1,5 @@
 {
-  "competition_winner": "CatBoost",
+  "competition_winner": "XGBoost",
   "competing_models": [
     "Ridge",
     "XGBoost",
@@ -9,15 +9,15 @@
   ],
   "tuner": "Optuna TPESampler (multivariate=True) + MedianPruner (boosting)",
   "n_trials": {
-    "Ridge": 5,
-    "XGBoost": 5,
-    "LightGBM": 5,
-    "CatBoost": 5,
-    "TabNet": 5
+    "Ridge": 500,
+    "XGBoost": 500,
+    "LightGBM": 500,
+    "CatBoost": 500,
+    "TabNet": 100
   },
   "gpu_used": true,
   "device": "cuda",
-  "training_date": "2026-05-08T03:07:07.663194",
+  "training_date": "2026-05-12T17:21:46.241827",
   "sklearn_version": "1.7.2",
   "optuna_version": "4.8.0",
   "python_version": "3.10.11",
@@ -53,34 +53,36 @@
   "target_transform": "np.log1p — reverter com np.expm1",
   "target_unit": "$100k USD",
   "conformal_q_hats": {
-    "0.8": 0.107861,
-    "0.9": 0.151516,
-    "0.95": 0.201622
+    "0.8": 0.133295,
+    "0.9": 0.194446,
+    "0.95": 0.254613
   },
   "best_hyperparams": {
-    "iterations": "580",
-    "learning_rate": "0.1937550186412042",
-    "depth": "9",
-    "l2_leaf_reg": "0.005575453980775369",
-    "bagging_temperature": "0.8925589984899778",
-    "random_strength": "0.1436709513866423",
-    "border_count": "212"
+    "n_estimators": 573,
+    "learning_rate": 0.02537407815079108,
+    "max_depth": 9,
+    "subsample": 0.8972672148504683,
+    "colsample_bytree": 0.500998607593687,
+    "min_child_weight": 1,
+    "reg_alpha": 3.4158867038635544e-08,
+    "reg_lambda": 0.05805605402091764,
+    "gamma": 1.4214841513542551e-07
   },
-  "best_cv_r2": 0.8572,
+  "best_cv_r2": 0.8667,
   "all_scores": {
-    "CatBoost": 0.9526,
-    "XGBoost": 0.9019,
-    "LightGBM": 0.7892,
-    "TabNet": 0.5889,
-    "Ridge": 0.1673
+    "XGBoost": 0.9017,
+    "LightGBM": 0.8971,
+    "CatBoost": 0.8527,
+    "TabNet": 0.5846,
+    "Ridge": 0.2
   },
   "metrics_test": {
-    "R2": 0.8654,
-    "RMSE_100k": 0.4445,
-    "MAE_100k": 0.2818,
-    "MAPE_pct": 15.37,
-    "IS_80pct": 1.5292,
-    "PICP_80pct": 0.7175,
-    "MACE": 0.0629
+    "R2": 0.8737,
+    "RMSE_100k": 0.433,
+    "MAE_100k": 0.2698,
+    "MAPE_pct": 14.71,
+    "IS_80pct": 1.4604,
+    "PICP_80pct": 0.8055,
+    "MACE": 0.0076
   }
 }
