@@ -227,7 +227,7 @@ Antes de qualquer tuning, todos os modelos são avaliados com hiperparâmetros p
 
 **`multivariate=True`:** modela correlações entre hiperparâmetros. Por exemplo: `learning_rate` alto requer `n_estimators` alto para manter desempenho — o TPE univariado ignora essa dependência, o multivariado não.
 
-**MedianPruner para boosting:** a cada fold da CV, o score acumulado é reportado ao Optuna. Se após o fold 1 o R² médio estiver abaixo da mediana dos trials já completos, o trial é cancelado — economizando até 4 dos 5 folds de um trial que claramente não vai ser bom.
+**MedianPruner para boosting:** a cada fold da CV, o score acumulado é reportado ao Optuna. Se após o fold 1 o R² médio estiver abaixo da mediana dos trials já completos, o trial é cancelado — economizando até 4 dos 5 folds de um CV que claramente não vai ser bom.
 
 **NopPruner para Ridge e TabNet:**
 - Ridge: a CV é uma operação única (sem steps intermediários para reportar)
@@ -387,19 +387,19 @@ A função `carregar_e_prever()` implementa um pipeline de inferência completo:
 | R² (CV) | ~0.60 | ~0.83 | ~0.85 | ~0.84 | ~0.78 |
 | MAPE (%) | ~30 % | ~18 % | ~17 % | ~18 % | ~22 % |
 | IS (80 %) | alto | médio | baixo | baixo-médio | médio |
-| PICP (80 %) | ≈ 0.80 | ≈ 0.80 | ≈ 0.80 | ≈ 0.80 | ≈ 0.80 |
+| PICP (80 %) | ~0.80 | ~0.80 | ~0.80 | ~0.80 | ~0.80 |
 
-> **PICP garantido pelo Conformal:** todos os modelos têm PICP ≈ nível nominal. O diferencial no Round 2 é a **largura** (MPIW) — modelos mais precisos geram `q_hat` menor → intervalos mais estreitos → melhor IS.
+> **PICP garantido pelo Conformal:** todos os modelos têm PICP ~ nível nominal. O diferencial no Round 2 é a **largura** (MPIW) — modelos mais precisos geram `q_hat` menor -> intervalos mais estreitos -> melhor IS.
 
 ### GPU: quando vale a pena por modelo e tamanho de dataset
 
 | Dataset | XGBoost GPU | LightGBM GPU | CatBoost GPU | TabNet GPU |
 |---------|-------------|--------------|--------------|------------|
-| ~12 k (este) | CPU ≈ GPU | CPU apenas | CPU ≈ GPU | **GPU melhor** |
+| ~12 k (este) | CPU ~ GPU | CPU apenas | CPU ~ GPU | **GPU melhor** |
 | ~100 k | GPU ligeiramente melhor | GPU ligeiramente melhor | **GPU melhor** | **GPU melhor** |
 | ~1 M+ | **GPU muito melhor** | **GPU muito melhor** | **GPU muito melhor** | **GPU melhor** |
 
-Para boosting em tabular pequeno, a transferência de dados CPU→GPU e o overhead de kernel CUDA supera o ganho computacional. GPU compensa para boosting a partir de ~100 k amostras. Redes neurais (TabNet) se beneficiam de GPU independente do tamanho.
+Para boosting em tabular pequeno, a transferência de dados CPU->GPU e o overhead de kernel CUDA supera o ganho computacional. GPU compensa para boosting a partir de ~100 k amostras. Redes neurais (TabNet) se beneficiam de GPU independente do tamanho.
 
 ### LightGBM sem GPU
 

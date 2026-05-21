@@ -51,13 +51,23 @@ Decisão apoiada: precificação de imóveis em propostas e avaliações de merc
 ## Fase CRISP-DM atual
 
 - [x] 1. Entendimento do negócio
-- [ ] 2. Entendimento dos dados
-- [ ] 3. Preparação dos dados
-- [ ] 4. Modelagem
-- [ ] 5. Avaliação
-- [ ] 6. Implantação
+- [x] 2. Entendimento dos dados
+- [x] 3. Preparação dos dados
+- [x] 4. Modelagem
+- [x] 5. Avaliação
+- [x] 6. Implantação
 
-**Fase ativa**: Entendimento dos dados
+**Fase ativa**: concluído — ciclo CRISP-DM encerrado em 2026-05-20.
+
+**Nota (2026-05-18):** Fases 2–4 concluídas no `model_competition.ipynb`.
+XGBoost venceu a competição de 5 modelos (R²=0.87, RMSE=0.433, MAE=0.270).
+
+**Nota (2026-05-20):** Fases 5–6 concluídas.
+- SHAP values: RendaMediana é o driver principal, seguido de Latitude/Longitude.
+- Fairness: gap de RMSE $22.6k entre Sul Costa e Norte Interior — alerta ativo.
+- MLflow: experimento registrado em `mlflow.db`, modelo `california-housing-xgboost` v1.
+- Inferência: `src/predict.py` com IC conformal 80% e alerta de teto ($450k).
+- Artefato XGBoost regenerado (incompatibilidade joblib entre versões detectada e corrigida).
 
 ---
 
@@ -118,6 +128,9 @@ e deve ser visível para qualquer pessoa que visitar o repositório.
 | 2026-05-13 | Métricas: RMSE + MAE + R² como primárias | Padrão de mercado para regressão imobiliária | negocio |
 | 2026-05-13 | Fairness por região geográfica | Latitude/Longitude são proxies de localização | negocio |
 | 2026-05-13 | Preferência por modelos interpretáveis | Corretores precisam entender o modelo | negocio |
+| 2026-05-20 | MLflow com backend SQLite (`mlflow.db`) | MLflow 3.12+ deprecou filesystem store — SQLite é o mínimo recomendado | mlops |
+| 2026-05-20 | Alerta de teto em $450k (não $500k) | IC conformal 80% com q_hat=0.133 já ultrapassa $500k para predições a partir de $450k | mlops |
+| 2026-05-20 | Pipeline XGBoost salvo via joblib — versão do XGBoost deve ser fixada | Incompatibilidade entre versões corrompeu predições silenciosamente (R²=-1.58) | orquestrador |
 
 ---
 

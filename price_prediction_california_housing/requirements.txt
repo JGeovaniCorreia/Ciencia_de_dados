@@ -1,0 +1,45 @@
+# =============================================================================
+# prediction-ca-housing — dependências do projeto
+# Python: 3.10.11 (mesmo usado no treino)
+#
+# Para criar o ambiente:
+#   python -m venv .venv
+#   .venv\Scripts\activate
+#   pip install -r requirements.txt
+#
+# Se SSL bloquear pip, use:
+#   pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
+# =============================================================================
+
+# --- Core científico ---
+numpy
+pandas
+joblib
+matplotlib
+
+# --- Machine Learning ---
+# CRÍTICO: manter sklearn==1.7.2 — versão usada no treino dos artefatos.
+# Downgrade para 1.6.x causa predições incorretas ao carregar o pipeline serializado.
+scikit-learn==1.7.2
+
+# ATENÇÃO: xgboost — versão do treino não registrada no metadata.
+# 2.1.4 é a versão disponível no ambiente original; usar essa como referência.
+xgboost==2.1.4
+
+lightgbm
+catboost
+
+# --- Deep learning tabular (usado no notebook de competição) ---
+# torch deve ser instalado separadamente com suporte CUDA 12.8:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128
+pytorch-tabnet
+
+# --- Otimização de hiperparâmetros ---
+optuna==4.8.0
+optuna-dashboard
+
+# --- Explicabilidade ---
+shap
+
+# --- Rastreamento de experimentos ---
+mlflow
