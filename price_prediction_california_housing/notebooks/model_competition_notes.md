@@ -147,7 +147,31 @@ A divisão é `train_test_split(test_size=0.20)` → `train_test_split(test_size
 
 ---
 
-### 3.2 Factory de Pipelines
+### 3.2 Truncamento do Target
+
+O dataset armazena `MedHouseVal` em escala $100k com teto em 5.0 — qualquer imóvel que
+valia mais de $500k em 1990 foi registrado como exatamente 5.0. 
+
+obs: Na prática o valor é `5.000010` por arredondamento de ponto flutuante, então a detecção correta usa `>= 4.999`,
+não `== 5.0` (que encontra apenas 27 registros em vez dos 992 reais, e 992 é a quantidade correta).
+
+**Distribuição do truncamento por região geográfica:**
+
+| Região | Amostras | % truncados |
+|--------|----------|-------------|
+| Norte Interior | 492 | 0.2% |
+| Norte Costa | 9.835 | 4.0% |
+| Sul Interior | 9.830 | 5.3% |
+| Sul Costa | 483 | **15.7%** |
+| Global | 20.640 | 4.8% |
+
+Sul Costa (LA / San Diego) concentra 3.3× mais truncamentos que a média. Aliado à
+sub-representação (2.3% das amostras), isso explica o RMSE elevado nessa região —
+qualquer modelo treinado neste dataset terá o mesmo comportamento. Ver `reports/truncation_analysis.py`.
+
+---
+
+### 3.3 Factory de Pipelines
 
 A função `criar_pipeline(modelo)` encapsula os 4 estágios em sequência:
 
