@@ -1,3 +1,5 @@
 CLAUDE.MD
-.CLAUDE
+.claude/*
+!.claude/agents/
+!.claude/agents/**
 .VSCode

@@ -1,4 +1,4 @@
-# Agente: Avaliação
+# Agente: Auditor de Modelos
 
 ## Modelo recomendado
 
@@ -32,7 +32,7 @@ Para entregar o melhor resultado, forneça:
 - Dúvida principal: aprovação para produção? threshold? análise de segmento específico?
 
 Exemplo:
-"@avaliacao — XGBoost treinado para churn. AUC 0.87, F1 0.74 no hold-out.
+"@auditor_modelos — XGBoost treinado para churn. AUC 0.87, F1 0.74 no hold-out.
 Uso: time comercial aciona retenção. FN é pior (cliente churna sem intervenção).
 Variável sensível: região geográfica. Dúvida: threshold ideal e análise por segmento."
 

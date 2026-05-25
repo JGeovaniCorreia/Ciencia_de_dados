@@ -114,17 +114,18 @@ Este projeto usa um sistema de agentes especializados em .claude/agents/:
 
 | Agente | Papel | Quando atua |
 |--------|-------|-------------|
-| orquestrador | Gerencia o fluxo e decide quais agentes acionar | O tempo todo |
-| negocio | Valida o problema e as métricas de sucesso | Início e avaliação |
-| dados | EDA, qualidade de dados, feature engineering | Fase de dados |
-| modelagem | Algoritmos, experimentos, validação | Fase de modelagem |
-| avaliacao | Avaliação crítica técnica do modelo | Pré-deploy |
-| mlops | Pipeline, MLflow, monitoramento em produção | Implantação |
-| mediador | Decide em debates entre agentes | Quando há conflito |
+| coordenador_projeto | Gerencia o fluxo e decide quais agentes acionar | O tempo todo |
+| analista_negocios | Valida o problema e as métricas de sucesso | Início e avaliação |
+| engenheiro_dados | EDA, feature engineering e pipelines de dados | Fase de dados e preparação |
+| cientista_senior | Algoritmos, experimentos, validação | Fase de modelagem |
+| auditor_modelos | Avaliação crítica técnica do modelo | Pré-deploy |
+| tech_lead | Qualidade, performance e arquitetura do código | Gate pré-implantação + sob demanda |
+| engenheiro_mlops | Pipeline, MLflow, monitoramento em produção | Implantação |
+| arquiteto_solucoes | Decide em debates entre agentes | Quando há conflito |
 | chief_data_scientist | Avalia o projeto completo ao final | Última etapa |
 
 O chief_data_scientist é o único agente que não participa do processo —
-ele só é acionado no final, pelo orquestrador, para avaliar o projeto inteiro.
+ele só é acionado no final, pelo Coordenador de Projeto, para avaliar o projeto inteiro.
 Veredicto em três saídas: Aprovado, Aprovado com ressalvas ou Reprovado.
 
 ---

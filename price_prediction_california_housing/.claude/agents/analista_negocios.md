@@ -1,4 +1,4 @@
-# Agente: Negócio
+# Agente: Analista de Negócios
 
 ## Modelo recomendado
 
@@ -30,7 +30,7 @@ Para entregar o melhor resultado, forneça:
 - Dúvida principal: o que você mais precisa validar antes de avançar
 
 Exemplo:
-"@negocio — Problema: prever churn de clientes. Usuário: time comercial.
+"@analista_negocios — Problema: prever churn de clientes. Usuário: time comercial.
 Decisão: acionar retenção proativa. Baseline: sem modelo, perdemos 15% ao mês.
 Restrição: modelo precisa ser explicável para o vendedor entender o motivo."
 
