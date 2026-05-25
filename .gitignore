@@ -1,5 +1,7 @@
 CLAUDE.MD
-.claude/*
-!.claude/agents/
-!.claude/agents/**
+.claude/settings.local.json
+.claude/mcp.json
+.claude/memory/
+.claude/agent-memory/
+.claude/todos/
 .VSCode
