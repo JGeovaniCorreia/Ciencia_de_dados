@@ -1,7 +1,9 @@
-CLAUDE.MD
+# Claude Code — arquivos locais
+CLAUDE.local.md
 .claude/settings.local.json
-.claude/mcp.json
 .claude/memory/
 .claude/agent-memory/
 .claude/todos/
-.VSCode
+
+# IDEs
+.vscode/
