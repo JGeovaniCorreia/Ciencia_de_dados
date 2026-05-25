@@ -18,6 +18,7 @@ Returns a dict with keys:
     alerta_teto     — True if prediction is in the $450k+ risk zone
 """
 
+import functools
 import json
 import os
 import sys
@@ -55,6 +56,7 @@ def _load_pipeline():
     return joblib.load(_PIPELINE_PATH)
 
 
+@functools.lru_cache(maxsize=None)
 def _load_q_hat(nivel: float) -> float:
     with open(_METADATA_PATH) as f:
         meta = json.load(f)
@@ -87,7 +89,7 @@ def _normalize_input(X) -> pd.DataFrame:
 
 
 def prever(
-    X,
+    X: dict | list[dict] | pd.DataFrame,
     nivel_confianca: float = 0.8,
     pipeline=None,
 ) -> dict:

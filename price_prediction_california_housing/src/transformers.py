@@ -18,7 +18,7 @@ class WinsorizacaoTransformer(BaseEstimator, TransformerMixin):
         self.colunas = colunas
         self.k = k
 
-    def fit(self, X, y=None):
+    def fit(self, X: pd.DataFrame, y=None) -> "WinsorizacaoTransformer":
         df = pd.DataFrame(X) if not isinstance(X, pd.DataFrame) else X
         cols = self.colunas or df.columns.tolist()
         self.bounds_: dict = {}
@@ -29,7 +29,7 @@ class WinsorizacaoTransformer(BaseEstimator, TransformerMixin):
                 self.bounds_[col] = (q1 - self.k * iqr, q3 + self.k * iqr)
         return self
 
-    def transform(self, X):
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         check_is_fitted(self, attributes=["bounds_"])
         df = pd.DataFrame(X).copy() if not isinstance(X, pd.DataFrame) else X.copy()
         for col, (lo, hi) in self.bounds_.items():
@@ -53,12 +53,16 @@ class CaliforniaHousingTransformer(BaseEstimator, TransformerMixin):
     ]
     OUTPUT_COLS = INPUT_COLS + ["razao_quartos", "comodos_por_pessoa", "dist_sf", "dist_la", "dist_sd"]
 
-    def fit(self, X, y=None):
+    def fit(self, X: pd.DataFrame, y=None) -> "CaliforniaHousingTransformer":
         return self
 
-    def transform(self, X):
-        df = X[self.INPUT_COLS].copy() if isinstance(X, pd.DataFrame) \
-             else pd.DataFrame(X, columns=self.INPUT_COLS[:X.shape[1]])
+    def transform(self, X: pd.DataFrame) -> np.ndarray:
+        if not isinstance(X, pd.DataFrame):
+            raise TypeError(
+                f"X deve ser um DataFrame pandas com colunas nomeadas. "
+                f"Recebido: {type(X).__name__}"
+            )
+        df = X[self.INPUT_COLS].copy()
         for col in self.LOG1P_FEATURES:
             df[col] = np.log1p(df[col])
         df["razao_quartos"] = df["MediaQuartos"] / (df["MediaComodos"] + 1e-8)
