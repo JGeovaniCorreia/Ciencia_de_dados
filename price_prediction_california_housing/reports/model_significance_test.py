@@ -6,9 +6,13 @@ significant, or could it be noise from the CV split?
 Method: 10-fold CV on the training set, Wilcoxon signed-rank test on paired RMSE
 scores (non-parametric, appropriate for small n).
 
-Note: XGBoost uses Optuna-tuned params (500 trials). LightGBM uses defaults — no
-Optuna tuning was run for it. The comparison is conservative for XGBoost: with
-equivalent tuning, the gap could be smaller.
+Context: in the model competition (model_competition.ipynb), both XGBoost and
+LightGBM were tuned with 500 Optuna trials — the 500 trials for LightGBM optimised
+its cross-validation hyperparameters (recorded in competition_metadata.json). This
+script deliberately uses LightGBM with default parameters to isolate the effect of
+XGBoost's Optuna tuning. The comparison is therefore "tuned XGBoost vs untuned
+LightGBM", a conservative scenario favourable to XGBoost. With equivalent Optuna
+tuning for LightGBM, the performance gap could be smaller or reversed.
 """
 
 import sys
@@ -141,10 +145,11 @@ def main() -> None:
     lines += [
         "",
         "NOTA METODOLOGICA:",
-        "  XGBoost usou params do Optuna (500 trials, cv_r2=0.9017 no MLflow).",
-        "  LightGBM usou params default (cv_r2=0.8971 no MLflow — sem tuning).",
-        "  Comparacao e conservadora para o XGBoost. Com tuning equivalente,",
-        "  a diferenca poderia ser menor ou reverter.",
+        "  Na competicao de modelos, LightGBM tambem recebeu 500 trials Optuna",
+        "  (registrado em competition_metadata.json). Este script usa LightGBM com",
+        "  defaults deliberadamente para isolar o efeito do tuning do XGBoost.",
+        "  A comparacao e 'XGBoost tunado vs LightGBM nao-tunado' — cenario",
+        "  conservador para o XGBoost. Com tuning equivalente, o gap poderia ser menor.",
     ]
 
     output = "\n".join(lines)

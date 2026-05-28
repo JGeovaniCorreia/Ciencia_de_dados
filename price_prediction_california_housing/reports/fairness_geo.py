@@ -66,7 +66,7 @@ REGION_LABELS = {
 # Data helpers
 # ---------------------------------------------------------------------------
 
-def load_and_split() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+def load_and_split() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame]:
     """Load California Housing and reproduce the exact notebook split.
 
     Returns
@@ -75,6 +75,9 @@ def load_and_split() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
         Test features with renamed columns.
     y_test : pd.Series
         Test target in log1p scale.
+    X_full : pd.DataFrame
+        Full dataset with renamed columns (20.640 amostras) — used to compute
+        stable geographic cut-points independent of the test split.
     """
     raw = fetch_california_housing(as_frame=True)
     X = raw.data.rename(columns=RENAME_MAP)
@@ -88,7 +91,7 @@ def load_and_split() -> tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
         X_trainval, y_trainval, test_size=0.25, random_state=RANDOM_STATE
     )
 
-    return X_test, y_test
+    return X_test, y_test, X
 
 
 # ---------------------------------------------------------------------------
@@ -125,10 +128,12 @@ def compute_metrics(
 # Region assignment
 # ---------------------------------------------------------------------------
 
-def assign_regions(X_test: pd.DataFrame) -> pd.Series:
+def assign_regions(X_test: pd.DataFrame, lat_med: float, lon_med: float) -> pd.Series:
     """Assign each test sample to one of four geographic quadrants.
 
-    Quadrant definition uses median Latitude and Longitude of X_test:
+    Quadrant definition uses pre-computed median Latitude and Longitude from the
+    full dataset (20.640 amostras) — not from X_test — ensuring cut-points are
+    stable and reproducible regardless of the test split used:
       - Norte Interior : Latitude >= median AND Longitude >= median (east)
       - Norte Costa    : Latitude >= median AND Longitude <  median (west, SF area)
       - Sul Interior   : Latitude <  median AND Longitude >= median
@@ -136,13 +141,12 @@ def assign_regions(X_test: pd.DataFrame) -> pd.Series:
 
     Args:
         X_test: Test DataFrame with 'Latitude' and 'Longitude' columns.
+        lat_med: Latitude cut-point (median of the full dataset).
+        lon_med: Longitude cut-point (median of the full dataset).
 
     Returns:
         pd.Series of string region keys aligned to X_test index.
     """
-    lat_med = X_test["Latitude"].median()
-    lon_med = X_test["Longitude"].median()
-
     norte = X_test["Latitude"] >= lat_med
     costa = X_test["Longitude"] < lon_med  # longitude is negative; less negative = more west
 
@@ -158,7 +162,7 @@ def assign_regions(X_test: pd.DataFrame) -> pd.Series:
         np.select(conditions, choices, default="desconhecido"),
         index=X_test.index,
         name="regiao",
-    ), lat_med, lon_med
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -286,7 +290,7 @@ def main() -> None:
 
     # --- Load data and reproduce exact notebook split ---
     print("Carregando dados e reproduzindo split exato do notebook (60/20/20)...")
-    X_test, y_test = load_and_split()
+    X_test, y_test, X_full = load_and_split()
     print(f"X_test shape: {X_test.shape} | y_test shape: {y_test.shape}")
 
     # --- Predict ---
@@ -294,8 +298,11 @@ def main() -> None:
     y_pred_log = pipeline.predict(X_test)
 
     # --- Assign geographic regions ---
+    lat_med = X_full["Latitude"].median()
+    lon_med = X_full["Longitude"].median()
+    print(f"Cut-points calculados sobre dataset completo (20.640 amostras) — independentes do split.")
     print("Atribuindo regiões geográficas...")
-    regions, lat_med, lon_med = assign_regions(X_test)
+    regions = assign_regions(X_test, lat_med, lon_med)
     print(f"  Mediana Latitude : {lat_med:.4f}°")
     print(f"  Mediana Longitude: {lon_med:.4f}°")
     print(f"  Distribuição de amostras por região:\n{regions.value_counts().to_string()}\n")

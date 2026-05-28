@@ -47,15 +47,12 @@ def load_data() -> tuple[pd.DataFrame, pd.Series]:
     return X, y
 
 
-def reproduce_train_split(X: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
-    """Reproduz o split exato do notebook: 60/20/20."""
-    X_trainval, _, y_trainval, _ = train_test_split(
+def reproduce_test_split(X: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
+    """Reproduz o split exato do notebook: 60/20/20 — retorna X_test (20% final)."""
+    _, X_test, _, _ = train_test_split(
         X, y, test_size=0.20, random_state=RANDOM_STATE
     )
-    X_train, _, _, _ = train_test_split(
-        X_trainval, y_trainval, test_size=0.25, random_state=RANDOM_STATE
-    )
-    return X_train
+    return X_test
 
 
 def main() -> None:
@@ -65,12 +62,12 @@ def main() -> None:
 
     print("Carregando dados e reproduzindo split do notebook...")
     X, y = load_data()
-    X_train = reproduce_train_split(X, y)
+    X_test = reproduce_test_split(X, y)
 
     rng = np.random.default_rng(RANDOM_STATE)
-    idx = rng.choice(len(X_train), size=min(SAMPLE_SIZE, len(X_train)), replace=False)
-    X_sample = X_train.iloc[idx].reset_index(drop=True)
-    print(f"Amostra de {len(X_sample)} linhas do conjunto de treino selecionada.")
+    idx = rng.choice(len(X_test), size=min(SAMPLE_SIZE, len(X_test)), replace=False)
+    X_sample = X_test.iloc[idx].reset_index(drop=True)
+    print(f"Amostra de {len(X_sample)} linhas do conjunto de teste selecionada.")
 
     print("Transformando features via pipeline (exceto o modelo final)...")
     X_transformed = pipeline[:-1].transform(X_sample)

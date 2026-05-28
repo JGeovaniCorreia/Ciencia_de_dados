@@ -19,6 +19,7 @@
   "device": "cuda",
   "training_date": "2026-05-12T17:21:46.241827",
   "sklearn_version": "1.7.2",
+  "xgboost_version": "2.1.4",
   "optuna_version": "4.8.0",
   "python_version": "3.10.11",
   "n_train_samples": 12384,

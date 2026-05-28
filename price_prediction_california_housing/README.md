@@ -7,6 +7,8 @@ treinado sobre o dataset do Censo Americano de 1990 (StatLib / scikit-learn).
 > imóveis em propostas e avaliações. O modelo prevê o valor mediano do *block group* — a menor
 > unidade geográfica publicada pelo censo (600 a 3.000 habitantes) — não o preço de uma
 > casa individual.
+> **Nota:** os dados são do Censo Americano de 1990 — o modelo não reflete valores de mercado
+> atuais e destina-se a fins educacionais e de portfólio.
 
 ---
 
@@ -37,6 +39,8 @@ treinado sobre o dataset do Censo Americano de 1990 (StatLib / scikit-learn).
 | CatBoost | 0.8527 |
 | TabNet | 0.5846 |
 | Ridge | 0.20 |
+
+> ¹ CV 5-fold em X_train (60% dos dados). R² no test set: 0.8737 (gap de 2.8pp — overfitting leve, dentro do limiar aceitável).
 
 Intervalos de confiança via **Conformal Prediction** — split 60/20/20 (treino / calibração / teste).
 
@@ -155,6 +159,14 @@ jupyter nbconvert --to notebook --execute notebooks/model_competition.ipynb
 
 ## Limitações conhecidas
 
+### Dado histórico
+
+O dataset é do Censo Americano de 1990 — reflete o mercado imobiliário da Califórnia de mais
+de 35 anos atrás. Os valores nominais estão em dólares de 1990 e a estrutura socioeconômica
+das regiões mudou significativamente desde então. **Não use este modelo para precificação em
+mercado real atual.** Destina-se exclusivamente a fins educacionais, portfólio e demonstração
+de metodologia de ML.
+
 ### Truncamento do target
 
 O dataset do Censo de 1990 **capeou todos os imóveis acima de $500k** em exatamente 5.0
@@ -182,6 +194,14 @@ Um alerta automático é emitido para predições acima de **$450k** (onde o IC 
 superior já extrapola $500k com q_hat=0.133). Execute `reports/truncation_analysis.py`
 para reproduzir a análise de truncamento por região.
 
+O intervalo de confiança conformal (80%) foi calibrado sobre um conjunto que inclui os
+~4.8% de registros com target truncado em $500k. Para esses registros, o score de
+não-conformidade é artificialmente pequeno — o modelo prevê ~$500k e o target também é
+$500k, não porque acertou, mas porque o valor real foi censurado. Por isso, o IC pode
+ser **ligeiramente estreito para imóveis próximos ao teto**: a cobertura de 80.55% é
+válida para a distribuição do dataset, mas pode ser menor para imóveis genuinamente
+acima de $500k.
+
 ### Fairness geográfica
 
 | Região | N (test) | RMSE | R² |
@@ -196,9 +216,6 @@ Dois alertas ativos:
   sub-representação (ver seção acima).
 - **Norte Interior**: R²=0.69 abaixo do threshold de 0.80 — sub-representação estrutural
   do dataset de 1990 (apenas 120 amostras no test set).
-
-### Dado histórico
-O dataset é do Censo de 1990 — não reflete o mercado imobiliário atual da Califórnia.
 
 ---
 

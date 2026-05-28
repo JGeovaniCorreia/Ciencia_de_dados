@@ -194,6 +194,12 @@ O TabNet e o Ridge são sensíveis à escala. Para XGBoost, LightGBM e CatBoost,
 - **Papel no projeto:** Baseline linear. Estabelece o piso de desempenho — qualquer modelo mais complexo deve superá-lo para justificar sua adoção.
 - **Limitação fundamental:** Não captura interações não-lineares entre features. R² esperado neste dataset: ~0.55–0.65.
 
+**Resultado observado (R²=0.20):** valor 3× abaixo do esperado. Hipótese provável:
+o espaço de busca Optuna para `alpha` estava mal calibrado — valores altos de regularização
+resultaram em underfitting severo. Confirma a limitação fundamental do modelo linear neste
+problema: `MedInc × Latitude` e outras interações não-lineares fortes não são capturáveis
+por regressão linear.
+
 #### XGBoost
 - **Família:** Gradient Boosting level-wise (cresce a árvore nível por nível)
 - **GPU:** `device='cuda'` quando disponível — transfere matrizes de histograma para a GPU
@@ -298,6 +304,10 @@ Compara métricas calculadas em `X_train` (após retreinamento full) vs. `X_test
 | < −5 % | Vermelho | Overfitting — revisar regularização |
 
 Um gap negativo grande indica que o modelo memorizou os dados de treino sem generalizar. Modelos tree-based com profundidade alta (XGBoost, CatBoost) são candidatos mais frequentes a overfitting do que Ridge ou LightGBM com `min_child_samples` alto.
+
+**Resultado do XGBoost vencedor:** CV R²=0.9017 → Teste R²=0.8737 → Gap=−2.8pp → **Laranja**
+(dentro do limiar aceitável, mas a monitorar). O gap é esperado dado o truncamento do target
+em $500k: o modelo aprende o teto na CV mas encontra subestimação sistemática no test set.
 
 ---
 

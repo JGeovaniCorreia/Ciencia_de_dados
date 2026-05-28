@@ -16,6 +16,7 @@ numpy==2.2.6
 pandas==2.3.3
 joblib==1.5.3
 matplotlib==3.10.9
+statsmodels==0.14.4  # análise de resíduos LOWESS
 
 # --- Machine Learning ---
 # CRÍTICO: manter sklearn==1.7.2 — versão usada no treino dos artefatos.
@@ -32,11 +33,11 @@ catboost==1.2.10
 # --- Deep learning tabular (usado no notebook de competição) ---
 # torch deve ser instalado separadamente com suporte CUDA 12.8:
 #   pip install torch --index-url https://download.pytorch.org/whl/cu128
-pytorch-tabnet
+pytorch-tabnet==4.1.0
 
 # --- Otimização de hiperparâmetros ---
 optuna==4.8.0
-optuna-dashboard
+optuna-dashboard==0.20.0
 
 # --- Explicabilidade ---
 shap==0.49.1

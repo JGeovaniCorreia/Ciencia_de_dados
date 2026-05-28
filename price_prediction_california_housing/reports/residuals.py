@@ -1,9 +1,10 @@
 """Residuals analysis for the California Housing XGBoost model.
 
-Generates three diagnostic plots on the test set:
-  1. residuals_histogram.png  — distribution of residuals in $100k
-  2. residuals_vs_fitted.png  — residuals vs. fitted values with LOWESS smoother
-  3. residuals_qq.png         — Q-Q plot for normality check
+Generates four diagnostic plots on the test set:
+  1. residuals_histogram.png   — distribution of residuals in $100k
+  2. residuals_vs_fitted.png   — residuals vs. fitted values with LOWESS smoother
+  3. residuals_qq.png          — Q-Q plot for normality check
+  4. residuals_by_decile.png   — RMSE and MAE by target decile
 
 Prints summary statistics to stdout.
 
@@ -12,6 +13,7 @@ Outputs
 reports/residuals_histogram.png
 reports/residuals_vs_fitted.png
 reports/residuals_qq.png
+reports/residuals_by_decile.png
 """
 
 import os
@@ -25,74 +27,12 @@ import joblib
 import scipy.stats as stats
 from sklearn.datasets import fetch_california_housing
 from sklearn.model_selection import train_test_split
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import check_is_fitted
-
-
-# ---------------------------------------------------------------------------
-# Pipeline classes — required before joblib.load to reconstruct the pipeline
-# ---------------------------------------------------------------------------
-
-class WinsorizacaoTransformer(BaseEstimator, TransformerMixin):
-    """Winsorization with IQR bounds learned at fit time."""
-
-    def __init__(self, colunas=None, k=3.0):
-        self.colunas = colunas
-        self.k = k
-
-    def fit(self, X, y=None):
-        df = pd.DataFrame(X) if not isinstance(X, pd.DataFrame) else X
-        cols = self.colunas or df.columns.tolist()
-        self.bounds_ = {}
-        for col in cols:
-            if col in df.columns:
-                q1, q3 = df[col].quantile([0.25, 0.75])
-                iqr = q3 - q1
-                self.bounds_[col] = (q1 - self.k * iqr, q3 + self.k * iqr)
-        return self
-
-    def transform(self, X):
-        check_is_fitted(self, attributes=["bounds_"])
-        df = pd.DataFrame(X).copy() if not isinstance(X, pd.DataFrame) else X.copy()
-        for col, (lo, hi) in self.bounds_.items():
-            if col in df.columns:
-                df[col] = df[col].clip(lo, hi)
-        return df
-
-
-class CaliforniaHousingTransformer(BaseEstimator, TransformerMixin):
-    """Feature engineering for the California Housing dataset."""
-
-    _CITIES = {
-        "sf": (37.7749, -122.4194),
-        "la": (34.0522, -118.2437),
-        "sd": (32.7157, -117.1611),
-    }
-    LOG1P_FEATURES = ["RendaMediana", "Populacao", "MediaOcupacao"]
-    INPUT_COLS = [
-        "RendaMediana", "IdadeMediaResidencias", "MediaComodos",
-        "MediaQuartos", "Populacao", "MediaOcupacao", "Latitude", "Longitude",
-    ]
-    OUTPUT_COLS = INPUT_COLS + ["razao_quartos", "comodos_por_pessoa", "dist_sf", "dist_la", "dist_sd"]
-
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X):
-        df = X[self.INPUT_COLS].copy() if isinstance(X, pd.DataFrame) \
-             else pd.DataFrame(X, columns=self.INPUT_COLS[:X.shape[1]])
-        for col in self.LOG1P_FEATURES:
-            df[col] = np.log1p(df[col])
-        df["razao_quartos"] = df["MediaQuartos"] / (df["MediaComodos"] + 1e-8)
-        df["comodos_por_pessoa"] = df["MediaComodos"] / (df["MediaOcupacao"] + 1e-8)
-        for city, (lat, lon) in self._CITIES.items():
-            df[f"dist_{city}"] = np.sqrt(
-                (df["Latitude"] - lat) ** 2 + (df["Longitude"] - lon) ** 2
-            )
-        return df[self.OUTPUT_COLS].values
-
-    def get_feature_names_out(self, input_features=None):
-        return np.array(self.OUTPUT_COLS)
+import sys
+from pathlib import Path as _Path
+_PROJECT_ROOT = _Path(__file__).parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+from src.transformers import WinsorizacaoTransformer, CaliforniaHousingTransformer
 
 
 # ---------------------------------------------------------------------------
@@ -264,15 +204,60 @@ def save_qq_plot(residuals: np.ndarray, path: str) -> None:
     print(f"Q-Q plot salvo em: {path}")
 
 
+def save_decile_analysis(y_true: np.ndarray, y_pred: np.ndarray, path: str) -> None:
+    """Save double bar chart of RMSE and MAE by target decile.
+
+    Args:
+        y_true: Ground-truth values in $100k scale.
+        y_pred: Predicted values in $100k scale.
+        path: Absolute path for the output PNG.
+    """
+    residuals = y_true - y_pred
+    deciles = pd.qcut(y_true, q=10, duplicates="drop")
+    df = pd.DataFrame({"residual": residuals, "decil": deciles})
+
+    grouped = df.groupby("decil", observed=True)["residual"]
+    rmse = grouped.apply(lambda r: np.sqrt((r ** 2).mean()))
+    mae = grouped.apply(lambda r: np.abs(r).mean())
+    labels = [
+        f"${int(iv.left * 100)}k–\n${int(iv.right * 100)}k"
+        for iv in rmse.index
+    ]
+
+    x = np.arange(len(labels))
+    width = 0.38
+
+    fig, ax = plt.subplots(figsize=(13, 6))
+    ax.bar(x - width / 2, rmse.values, width, label="RMSE", color="steelblue", alpha=0.85)
+    ax.bar(x + width / 2, mae.values, width, label="MAE", color="firebrick", alpha=0.75)
+
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, fontsize=8)
+    ax.set_xlabel("Faixa de preço real (decil)", fontsize=11)
+    ax.set_ylabel("Erro ($100k)", fontsize=11)
+    ax.set_title(
+        "RMSE e MAE por decil do target\nXGBoost — California Housing (test set)",
+        fontsize=12, pad=12,
+    )
+    ax.legend(fontsize=10)
+
+    plt.tight_layout()
+    plt.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"Análise por decil salva em: {path}")
+
+
 # ---------------------------------------------------------------------------
 # Summary statistics
 # ---------------------------------------------------------------------------
 
-def print_summary(residuals: np.ndarray) -> None:
+def print_summary(residuals: np.ndarray, y_true: np.ndarray, y_pred: np.ndarray) -> None:
     """Print key residual statistics to stdout.
 
     Args:
         residuals: Array of residuals in $100k scale.
+        y_true: Ground-truth values in $100k scale (for decile breakdown).
+        y_pred: Predicted values in $100k scale (for decile breakdown).
     """
     mean_res = residuals.mean()
     std_res = residuals.std()
@@ -321,6 +306,26 @@ def print_summary(residuals: np.ndarray) -> None:
     print("    aumenta com os valores preditos, ha heterocedasticidade.")
     print("    Isso e esperado em datasets com truncamento de target (teto em $500k).")
 
+    print(f"\n  Spearman |residuo| vs rank predito: r={rank_corr:.4f}  p={p_rank:.4e}")
+    if abs(rank_corr) > 0.3 and p_rank < 0.05:
+        print("  [ATENCAO] Heterocedasticidade detectada — variancia dos residuos nao e constante.")
+        print("            Correlacao rank sugere que erros crescem com o valor predito.")
+    else:
+        print("  [OK] Sem evidencia estatistica de heterocedasticidade (|r| <= 0.3 ou p >= 0.05).")
+
+    deciles = pd.qcut(y_true, q=10, duplicates="drop")
+    rmse_by_decile = (
+        pd.DataFrame({"residual": residuals, "decil": deciles})
+        .groupby("decil", observed=True)["residual"]
+        .apply(lambda r: np.sqrt((r ** 2).mean()))
+    )
+    worst = rmse_by_decile.idxmax()
+    print(
+        f"\n  Decil com maior RMSE: {worst}"
+        f"  —  RMSE={rmse_by_decile.max():.4f} ($100k)"
+        f" = ${rmse_by_decile.max() * 100_000:,.0f}"
+    )
+
 
 # ---------------------------------------------------------------------------
 # Main
@@ -350,7 +355,7 @@ def main() -> None:
     residuals = y_true - y_pred        # residuals in $100k
 
     # --- Summary statistics ---
-    print_summary(residuals)
+    print_summary(residuals, y_true, y_pred)
 
     # --- Plot 1: Histogram ---
     hist_path = os.path.join(REPORTS_DIR, "residuals_histogram.png")
@@ -367,8 +372,13 @@ def main() -> None:
     print("Gerando Q-Q plot...")
     save_qq_plot(residuals, qq_path)
 
+    # --- Plot 4: RMSE and MAE by decile ---
+    decile_path = os.path.join(REPORTS_DIR, "residuals_by_decile.png")
+    print("Gerando analise de residuos por decil do target...")
+    save_decile_analysis(y_true, y_pred, decile_path)
+
     print("\nAnalise de residuos concluida. Arquivos gerados:")
-    for p in [hist_path, rvf_path, qq_path]:
+    for p in [hist_path, rvf_path, qq_path, decile_path]:
         exists = os.path.isfile(p)
         print(f"  {'[OK]' if exists else '[ERRO]'} {p}")
 

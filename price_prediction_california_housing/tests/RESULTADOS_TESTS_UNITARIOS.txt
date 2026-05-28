@@ -1,0 +1,22 @@
+==============================================================
+  RESULTADOS — TESTES UNITÁRIOS
+  California Housing · src/predict.py
+  Executado em: 2026-05-27 23:56:43
+==============================================================
+
+  Total: 9   Passaram: 9   Falharam: 0
+
+--------------------------------------------------------------
+  [OK  ]  test_prever_dict_en                            0.465s
+  [OK  ]  test_prever_list_of_dicts                      0.032s
+  [OK  ]  test_prever_dataframe_pt                       0.036s
+  [OK  ]  test_alerta_teto_ativado                       0.033s
+  [OK  ]  test_alerta_teto_desativado                    0.038s
+  [OK  ]  test_intervalo_contem_ponto                    0.036s
+  [OK  ]  test_colunas_faltando_raises                   0.001s
+  [OK  ]  test_tipo_invalido_raises                      0.000s
+  [OK  ]  test_nivel_confianca_invalido                  0.000s
+--------------------------------------------------------------
+
+  STATUS FINAL: VERDE — todos os testes passaram.
+==============================================================

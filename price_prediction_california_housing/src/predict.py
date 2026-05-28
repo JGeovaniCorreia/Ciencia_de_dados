@@ -52,6 +52,7 @@ TETO_ALERTA_100K = 4.5
 TETO_MODELO_100K = 5.0
 
 
+@functools.lru_cache(maxsize=1)
 def _load_pipeline():
     return joblib.load(_PIPELINE_PATH)
 
@@ -104,12 +105,14 @@ def prever(
 
     Returns:
         Dict with keys:
-            predicao_100k   (np.ndarray) — predicted value in $100k
-            predicao_usd    (np.ndarray) — predicted value in USD
-            intervalo_lower (np.ndarray) — lower bound in $100k
-            intervalo_upper (np.ndarray) — upper bound in $100k
-            alerta_teto     (list[bool]) — True if prediction >= $450k risk zone
-            mensagem_alerta (list[str])  — human-readable warning (empty str if OK)
+            predicao_100k    (np.ndarray) — predicted value in $100k
+            predicao_usd     (np.ndarray) — predicted value in USD
+            intervalo_lower  (np.ndarray) — lower bound in $100k
+            intervalo_upper  (np.ndarray) — upper bound in $100k
+            alerta_teto      (list[bool]) — True if prediction >= $450k risk zone
+            mensagem_alerta  (list[str])  — human-readable warning (empty str if OK)
+            alerta_teto_ic   (list[bool]) — True if upper bound >= $500k model ceiling
+            mensagem_alerta_ic (list[str]) — warning when IC exceeds ceiling (empty str if OK)
     """
     if pipeline is None:
         pipeline = _load_pipeline()
@@ -135,6 +138,16 @@ def prever(
         for a in alertas
     ]
 
+    alertas_ic = upper >= TETO_MODELO_100K
+    mensagens_ic = [
+        (
+            f"AVISO: intervalo de confianca extrapola o limite do modelo (${TETO_MODELO_100K * 100_000:,.0f}) — "
+            "o valor real pode estar acima da predicao central."
+        )
+        if a else ""
+        for a in alertas_ic
+    ]
+
     return {
         "predicao_100k": pred_100k,
         "predicao_usd": pred_usd,
@@ -142,6 +155,8 @@ def prever(
         "intervalo_upper": upper,
         "alerta_teto": alertas.tolist(),
         "mensagem_alerta": mensagens,
+        "alerta_teto_ic": alertas_ic.tolist(),
+        "mensagem_alerta_ic": mensagens_ic,
     }
 
 
