@@ -113,8 +113,6 @@ predições erradas silenciosamente (ver histórico de decisões).
 ├── artifacts/
 │   ├── competition_winner_xgboost.joblib  # Pipeline serializado
 │   └── competition_metadata.json          # Hiperparâmetros, métricas e q_hats
-├── configs/
-│   └── california_housing_optuna.db       # Banco de trials Optuna (não deletar)
 ├── notebooks/
 │   ├── model_competition.ipynb            # EDA + competição de modelos (fases 2–4)
 │   └── model_competition_notes.md         # Decisões de design documentadas
@@ -130,9 +128,18 @@ predições erradas silenciosamente (ver histórico de decisões).
 ├── src/
 │   ├── predict.py                         # Inferência em produção (com IC conformal)
 │   └── transformers.py                    # Transformadores customizados do pipeline
+├── tests/
+│   ├── test_predict.py                    # 9 testes unitários para src/predict.py
+│   └── conftest.py                        # Fixtures (patch de joblib.load)
+├── california_housing_optuna.db           # Banco de trials Optuna (não deletar)
 ├── mlflow.db                              # Registro de experimentos MLflow
 └── requirements.txt
 ```
+
+> **Nota sobre versionamento:** `mlflow.db` e `california_housing_optuna.db` são versionados
+> propositalmente. Este é um projeto de portfólio — clonar o repositório deve reproduzir o
+> histórico de experimentos (MLflow) e a busca de hiperparâmetros (Optuna) sem precisar
+> re-executar os treinos.
 
 ---
 

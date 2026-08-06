@@ -132,6 +132,7 @@ e deve ser visível para qualquer pessoa que visitar o repositório.
 | 2026-05-20 | Alerta de teto em $450k (não $500k) | IC conformal 80% com q_hat=0.133 já ultrapassa $500k para predições a partir de $450k | mlops |
 | 2026-05-20 | Pipeline XGBoost salvo via joblib — versão do XGBoost deve ser fixada | Incompatibilidade entre versões corrompeu predições silenciosamente (R²=-1.58) | orquestrador |
 | 2026-05-24 | Gap RMSE Sul Costa confirmado como falha de dataset, não de modelo | Sul Costa tem 15.7% de truncamento (3.3× média global) e apenas 483 amostras (2.3%) — dupla causa estrutural; `reports/truncation_analysis.py` reproduz a análise | avaliacao |
+| 2026-08-05 | `mlflow.db` e `california_housing_optuna.db` versionados no git | Projeto de portfólio: clonar o repo deve reproduzir o histórico completo de experimentos MLflow e trials Optuna, sem exigir re-treino do zero | mlops |
 
 ---
 
