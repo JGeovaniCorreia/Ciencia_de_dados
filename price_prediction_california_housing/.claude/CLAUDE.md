@@ -57,7 +57,9 @@ Decisão apoiada: precificação de imóveis em propostas e avaliações de merc
 - [x] 5. Avaliação
 - [x] 6. Implantação
 
-**Fase ativa**: concluído — ciclo CRISP-DM encerrado em 2026-05-20.
+**Fase ativa**: concluído — ciclo CRISP-DM encerrado. Veredicto final do Chief Data
+Scientist: **APROVADO** (2026-09-11). Deploy real ainda não realizado — aguardando
+revisão do dono do projeto para definir o momento.
 
 **Nota (2026-05-18):** Fases 2–4 concluídas no `model_competition.ipynb`.
 XGBoost venceu a competição de 5 modelos (R²=0.87, RMSE=0.433, MAE=0.270).
@@ -68,6 +70,19 @@ XGBoost venceu a competição de 5 modelos (R²=0.87, RMSE=0.433, MAE=0.270).
 - MLflow: experimento registrado em `mlflow.db`, modelo `california-housing-xgboost` v1.
 - Inferência: `src/predict.py` com IC conformal 80% e alerta de teto ($450k).
 - Artefato XGBoost regenerado (incompatibilidade joblib entre versões detectada e corrigida).
+
+**Nota (2026-05-24):** Chief Data Scientist avalia o ciclo: **Aprovado com ressalvas**
+(5 pendências — README, diagnóstico Sul Costa, código duplicado, artefato de resíduos,
+EDA formal).
+
+**Nota (2026-05-28):** Backlog de 16 itens (revisão CRISP-DM de 2026-05-25) aplicado
+por completo, cobrindo as 5 ressalvas do CDS.
+
+**Nota (2026-09-11):** Segunda passada do Chief Data Scientist confirma as 5 ressalvas
+resolvidas (evidência verificada arquivo a arquivo) → veredicto **Aprovado**. Restam
+2 gaps cosméticos não-bloqueantes: comentário obsoleto em `requirements.txt` e ausência
+de ablation study para colinearidade das features de distância geográfica. Detalhe
+completo no banco MCP.
 
 ---
 
@@ -133,6 +148,7 @@ e deve ser visível para qualquer pessoa que visitar o repositório.
 | 2026-05-20 | Pipeline XGBoost salvo via joblib — versão do XGBoost deve ser fixada | Incompatibilidade entre versões corrompeu predições silenciosamente (R²=-1.58) | orquestrador |
 | 2026-05-24 | Gap RMSE Sul Costa confirmado como falha de dataset, não de modelo | Sul Costa tem 15.7% de truncamento (3.3× média global) e apenas 483 amostras (2.3%) — dupla causa estrutural; `reports/truncation_analysis.py` reproduz a análise | avaliacao |
 | 2026-08-05 | `mlflow.db` e `california_housing_optuna.db` versionados no git | Projeto de portfólio: clonar o repo deve reproduzir o histórico completo de experimentos MLflow e trials Optuna, sem exigir re-treino do zero | mlops |
+| 2026-09-11 | Ciclo CRISP-DM formalmente encerrado — veredicto Aprovado | Segunda passada do CDS confirmou as 5 ressalvas de 2026-05-24 resolvidas pelo backlog de 2026-05-28; deploy fica pendente de avaliação própria do dono do projeto | chief_data_scientist |
 
 ---
 
