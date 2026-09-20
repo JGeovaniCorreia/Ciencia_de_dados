@@ -58,6 +58,18 @@ Top features por importância média absoluta (SHAP TreeExplainer):
 
 ---
 
+## Dicionário de variáveis
+
+Todas as variáveis do projeto estão documentadas em **[`docs/data_dictionary.md`](docs/data_dictionary.md)**:
+
+- **Target** — `MedHouseVal` / `ValorMedioResidencias`, truncamento em $500k e `log1p`
+- **8 features originais** — nome sklearn ↔ nome em português, unidade, faixa e transformação (winsorização, `log1p`)
+- **5 features derivadas** — `razao_quartos`, `comodos_por_pessoa`, `dist_sf`, `dist_la`, `dist_sd` com fórmula e justificativa
+- **Variáveis auxiliares** — `regiao` (fairness), resíduos e máscara de truncamento
+- **Saídas de `prever()`** — predição, intervalo conformal e alertas de teto
+
+---
+
 ## Como usar
 
 ```python
@@ -110,6 +122,8 @@ predições erradas silenciosamente (ver histórico de decisões).
 ## Estrutura do projeto
 
 ```
+├── docs/
+│   └── data_dictionary.md                 # Dicionário de todas as variáveis
 ├── artifacts/
 │   ├── competition_winner_xgboost.joblib  # Pipeline serializado
 │   └── competition_metadata.json          # Hiperparâmetros, métricas e q_hats
