@@ -5,9 +5,26 @@
 
 ---
 
-## 1. Configuração do Ambiente
+## 1. Análise Exploratória de Dados (EDA)
 
-### 1.1 Imports e Dependências
+Seção puramente visual: cada subseção salva uma figura em `reports/` sem exibir no
+notebook. O dicionário de variáveis (descrição, unidade, faixa e transformação) está em
+[`docs/data_dictionary.md`](../docs/data_dictionary.md).
+
+| Subseção | Conteúdo | Figura |
+|----------|----------|--------|
+| 1.1 | Distribuição do target — truncamento em $500k visível | `eda_target_dist.png` |
+| 1.2 | Distribuição das 8 features originais | `eda_feature_dists.png` |
+| 1.3 | Outliers em AveRooms e AveBedrms | `eda_outliers.png` |
+| 1.4 | Correlação de Pearson entre features e target | `eda_correlation.png` |
+| 1.5 | Distribuição geográfica dos preços | `eda_geo.png` |
+| 1.6 | Conclusões da EDA — liga cada achado a uma decisão de preprocessing | — |
+
+---
+
+## 2. Configuração do Ambiente
+
+### 2.1 Imports e Dependências
 
 O notebook é auto-suficiente: todas as classes (transformadores, wrapper TabNet) são definidas internamente, sem depender de módulos externos ao arquivo. Isso evita problemas de importação e facilita portabilidade.
 
@@ -35,7 +52,7 @@ Todos os modelos com suporte a GPU (`XGBoost`, `CatBoost`, `TabNet`) usam `CUDA_
 
 ---
 
-### 1.2 Métricas de Avaliação
+### 2.2 Métricas de Avaliação
 
 #### Métricas de Ponto — Round 1
 
@@ -73,9 +90,9 @@ Um modelo que "chuta" intervalos enormes para garantir cobertura é penalizado t
 
 ---
 
-## 2. Preparação do Pipeline
+## 3. Preparação do Pipeline
 
-### 2.1 Transformadores Customizados
+### 3.1 Transformadores Customizados
 
 O pipeline sklearn exige que todos os estágios implementem `fit(X, y)` e `transform(X)`. As classes abaixo são definidas no notebook para manter auto-suficiência.
 
@@ -107,7 +124,7 @@ O `+ε` (1e-8) evita divisão por zero. As distâncias são euclidiana em graus 
 
 ---
 
-### 2.2 Wrapper TabNet
+### 3.2 Wrapper TabNet
 
 O `TabNetRegressor` original (biblioteca `pytorch-tabnet`) não segue a interface sklearn:
 - Exige que o `fit` receba arrays numpy (não DataFrames)
@@ -126,9 +143,9 @@ California Housing tem ~12.000 amostras e 11 features. Redes neurais geralmente 
 
 ---
 
-## 3. Dados
+## 4. Dados
 
-### 3.1 Carregamento e Divisão
+### 4.1 Carregamento e Divisão
 
 **Por que 3 partições em vez de 2 (treino/teste)?**
 
@@ -147,7 +164,7 @@ A divisão é `train_test_split(test_size=0.20)` → `train_test_split(test_size
 
 ---
 
-### 3.2 Truncamento do Target
+### 4.2 Truncamento do Target
 
 O dataset armazena `MedHouseVal` em escala $100k com teto em 5.0 — qualquer imóvel que
 valia mais de $500k em 1990 foi registrado como exatamente 5.0. 
@@ -171,7 +188,7 @@ qualquer modelo treinado neste dataset terá o mesmo comportamento. Ver `reports
 
 ---
 
-### 3.3 Factory de Pipelines
+### 4.3 Factory de Pipelines
 
 A função `criar_pipeline(modelo)` encapsula os 4 estágios em sequência:
 
@@ -184,9 +201,9 @@ O TabNet e o Ridge são sensíveis à escala. Para XGBoost, LightGBM e CatBoost,
 
 ---
 
-## 4. Competidores
+## 5. Competidores
 
-### 4.1 Descrição dos Modelos
+### 5.1 Descrição dos Modelos
 
 #### Ridge Regression
 - **Família:** Linear com regularização L2
@@ -229,9 +246,9 @@ por regressão linear.
 
 ---
 
-## 5. Round 1 — Acurácia de Ponto
+## 6. Round 1 — Acurácia de Ponto
 
-### 5.1 Baseline: CV com Parâmetros Padrão
+### 6.1 Baseline: CV com Parâmetros Padrão
 
 Antes de qualquer tuning, todos os modelos são avaliados com hiperparâmetros padrão em 5-Fold CV. Isso é importante por dois motivos:
 
@@ -240,9 +257,9 @@ Antes de qualquer tuning, todos os modelos são avaliados com hiperparâmetros p
 
 ---
 
-### 5.2 Otimização de Hiperparâmetros com Optuna
+### 6.2 Otimização de Hiperparâmetros com Optuna
 
-#### 5.2.1 Estratégia de Busca
+#### 6.2.1 Estratégia de Busca
 
 **Por que Optuna e não GridSearchCV ou RandomizedSearchCV?**
 
@@ -263,7 +280,7 @@ Antes de qualquer tuning, todos os modelos são avaliados com hiperparâmetros p
 - Ridge: a CV é uma operação única (sem steps intermediários para reportar)
 - TabNet: cada fold é caro (treinamento de rede neural) — implementar pruning tornaria o código mais complexo sem ganho prático significativo dado o número baixo de trials (40 vs 100)
 
-#### 5.2.2 Persistência dos Estudos
+#### 6.2.2 Persistência dos Estudos
 
 Cada modelo tem seu próprio estudo Optuna com nome único (`CalHousing_Ridge`, `CalHousing_XGBoost`, etc.) persistido em `california_housing_optuna.db` (SQLite).
 
@@ -279,7 +296,7 @@ O TPE usará todos os trials históricos para guiar os próximos — quanto mais
 
 **Por que um `_mk_sampler()` por estudo?** Para evitar estado compartilhado entre estudos. Se o mesmo objeto sampler fosse reutilizado em 5 `create_study`, o estado interno do TPE de um estudo poderia influenciar o outro.
 
-#### 5.2.3 Dashboard Optuna
+#### 6.2.3 Dashboard Optuna
 
 O `optuna-dashboard` é iniciado em background via `subprocess.Popen` com `CREATE_NEW_PROCESS_GROUP` — isso desacopla o processo do kernel Jupyter, então o servidor continua rodando mesmo após reiniciar o kernel.
 
@@ -287,13 +304,13 @@ A função `launch_optuna_dashboard()` tenta abrir o dashboard no **VS Code Simp
 
 ---
 
-### 5.3 Resultados do Round 1
+### 6.3 Resultados do Round 1
 
-#### 5.3.1 Métricas de Cross-Validation
+#### 6.3.1 Métricas de Cross-Validation
 
 As métricas do Round 1 são calculadas em 5-Fold CV sobre `X_train`. Importante: **CV não é avaliação no conjunto de teste** — é uma estimativa da capacidade de generalização do modelo.
 
-#### 5.3.2 Diagnóstico de Overfitting
+#### 6.3.2 Diagnóstico de Overfitting
 
 Compara métricas calculadas em `X_train` (após retreinamento full) vs. `X_test`. O **Gap R²** (Teste − Treino) deve ser próximo de zero:
 
@@ -311,9 +328,9 @@ em $500k: o modelo aprende o teto na CV mas encontra subestimação sistemática
 
 ---
 
-## 6. Round 2 — Confiabilidade das Predições
+## 7. Round 2 — Confiabilidade das Predições
 
-### 6.1 Split Conformal Prediction
+### 7.1 Split Conformal Prediction
 
 A **Conformal Prediction** é uma framework de cobertura garantida: dado um nível nominal de confiança (80%), o método garante que pelo menos 80% dos intervalos conterão o valor real — sem assumir distribuição dos erros.
 
@@ -328,20 +345,20 @@ O `(1 + 1/n_cal)` é uma correção finita que garante cobertura marginal exata 
 
 **Limitação:** os intervalos têm largura constante (simétrica em torno de ŷ). Modelos mais precisos geram `q_hat` menor → intervalos mais estreitos → vantagem no IS e MPIW.
 
-### 6.2 a 6.5 — Avaliações
+### 7.2 a 7.5 — Avaliações
 
 Após calcular os intervalos, o Round 2 avalia:
 
-- **6.2** — IS, PICP, MPIW, MACE para cada modelo a 80% de confiança
-- **6.3** — Curvas de calibração (10% a 90%): um modelo bem calibrado segue a diagonal y=x. Desvios sistemáticos acima indicam super-cobertura (intervalos largos demais); abaixo indicam sub-cobertura.
-- **6.4** — Visualização dos intervalos sobre 100 amostras ordenadas por valor real. Útil para ver se intervalos são mais largos onde os preços são mais altos (heteroscedasticidade).
-- **6.5** — Painel resumo das 4 métricas para os 5 modelos.
+- **7.2** — IS, PICP, MPIW, MACE para cada modelo a 80% de confiança
+- **7.3** — Curvas de calibração (10% a 90%): um modelo bem calibrado segue a diagonal y=x. Desvios sistemáticos acima indicam super-cobertura (intervalos largos demais); abaixo indicam sub-cobertura.
+- **7.4** — Visualização dos intervalos sobre 100 amostras ordenadas por valor real. Útil para ver se intervalos são mais largos onde os preços são mais altos (heteroscedasticidade).
+- **7.5** — Painel resumo das 4 métricas para os 5 modelos.
 
 ---
 
-## 7. Scoreboard Final
+## 8. Scoreboard Final
 
-### 7.1 Ranking Ponderado
+### 8.1 Ranking Ponderado
 
 O scoreboard normaliza cada métrica para [0, 1] e calcula uma nota ponderada:
 
@@ -363,9 +380,9 @@ O scoreboard normaliza cada métrica para [0, 1] e calcula uma nota ponderada:
 
 ---
 
-## 8. Experimento Final — Modelo Vencedor
+## 9. Experimento Final — Modelo Vencedor
 
-### 8.1 Protocolo
+### 9.1 Protocolo
 
 Após a eleição do vencedor pelo scoreboard:
 
@@ -377,7 +394,7 @@ Após a eleição do vencedor pelo scoreboard:
 **Por que não retreinar em 100% dos dados para produção?**  
 Para manter `X_test` como estimativa não-enviesada do desempenho em produção. Retreinar em 100% não tem avaliação independente — o desempenho reportado seria o do treino.
 
-### 8.4 Serialização e Artefatos
+### 9.4 Serialização e Artefatos
 
 Dois arquivos são gerados em `artifacts/`:
 
@@ -395,9 +412,9 @@ O `q_hat` é o elemento mais importante do metadata: sem ele, a função de infe
 
 ---
 
-## 9. Inferência
+## 10. Inferência
 
-### 9.1 Função de Inferência
+### 10.1 Função de Inferência
 
 A função `carregar_e_prever()` implementa um pipeline de inferência completo:
 
@@ -412,7 +429,7 @@ A função `carregar_e_prever()` implementa um pipeline de inferência completo:
 
 ---
 
-## 10. Conclusão
+## 11. Conclusão
 
 ### Resultados Esperados
 
