@@ -1,0 +1,5 @@
+regiao_key,regiao,n,rmse_100k,mae_100k,r2,mape_pct
+norte_interior,Norte Interior,120,0.3674,0.217,0.6939,23.21
+norte_costa,Norte Costa,1945,0.4169,0.2629,0.8767,15.69
+sul_interior,Sul Interior,1952,0.4416,0.2737,0.8323,13.28
+sul_costa,Sul Costa,111,0.5934,0.3812,0.7478,13.23

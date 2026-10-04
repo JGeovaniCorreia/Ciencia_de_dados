@@ -1,0 +1,24 @@
+==============================================================
+Teste de significância: XGBoost vs LightGBM
+==============================================================
+
+RMSE por fold ($100k):
+  XGBoost  : [0.4453, 0.435, 0.3904, 0.4611, 0.4571, 0.4052, 0.4381, 0.4409, 0.4211, 0.4181]
+  LightGBM : [0.4884, 0.4756, 0.414, 0.4935, 0.4759, 0.441, 0.4794, 0.4693, 0.4585, 0.4554]
+
+Média RMSE XGBoost  : 0.4312 ± 0.0213
+Média RMSE LightGBM : 0.4651 ± 0.0227
+Diferença média     : +0.0339 (+ = LightGBM pior)
+
+Wilcoxon signed-rank (pareado, bilateral, n=10 folds):
+  Estatística W       : 0.0000
+  p-value             : 0.0020
+  Tamanho do efeito r : 1.0000
+
+CONCLUSAO: diferenca estatisticamente significativa (p=0.0020 < 0.05). XGBoost e superior ao LightGBM neste dataset e com estes parametros.
+
+NOTA METODOLOGICA:
+  XGBoost usou params do Optuna (500 trials, cv_r2=0.9017 no MLflow).
+  LightGBM usou params default (cv_r2=0.8971 no MLflow — sem tuning).
+  Comparacao e conservadora para o XGBoost. Com tuning equivalente,
+  a diferenca poderia ser menor ou reverter.
