@@ -350,14 +350,14 @@
 <div class="wrap">
 
 <header class="page">
-  <p class="eyebrow">Arquitetura de referência · ciência de dados assistida por IA</p>
+  <p class="eyebrow">Arquitetura de referência · price_prediction_california_housing</p>
   <h1>Sistema de Contexto ML</h1>
   <p class="sub">agentes especializados · memória RAG · protocolo MCP</p>
   <p class="lead">
-    Como o Claude Code trabalha nos projetos de ciência de dados deste repositório: um time de
-    agentes com papéis definidos conduz o ciclo CRISP-DM, uma memória vetorial guarda decisões e
-    aprendizados entre sessões, e o protocolo MCP liga as duas coisas. O documento descreve cada
-    peça, como elas se conectam e como o sistema é operado.
+    Como o Claude Code trabalha neste projeto de previsão do valor mediano de imóveis por block
+    group na Califórnia: um time de agentes com papéis definidos conduz o ciclo CRISP-DM, uma
+    memória vetorial guarda decisões e aprendizados entre sessões, e o protocolo MCP liga as duas
+    coisas. O desenho serve de modelo para os demais projetos da área.
   </p>
   <dl class="facts">
     <div><dt>Agentes</dt><dd>9</dd></div>
@@ -386,8 +386,8 @@
   <h2>Três peças, três responsabilidades</h2>
 
   <p>
-    O sistema existe para que o trabalho com IA em projetos de ML siga método e não perca
-    contexto. Cada peça responde a uma pergunta diferente, e nenhuma faz o trabalho das outras.
+    O sistema existe para que o trabalho com IA no projeto siga método e não perca contexto entre
+    sessões. Cada peça responde a uma pergunta diferente, e nenhuma faz o trabalho das outras.
   </p>
 
   <div class="t-scroll">
@@ -399,7 +399,7 @@
         <tr>
           <td class="path">Sistema multiagentes</td>
           <td class="role">Quem trabalha em cada fase, em que ordem, e quando algo merece ser registrado.</td>
-          <td class="role"><code>CLAUDE.md</code> em três níveis e <code>.claude/agents/</code></td>
+          <td class="role"><code>.claude/agents/</code> e <code>.claude/CLAUDE.md</code> deste projeto</td>
         </tr>
         <tr>
           <td class="path">Memória RAG</td>
@@ -410,6 +410,58 @@
           <td class="path">Protocolo MCP</td>
           <td class="role">Como o Claude Code alcança a memória sem código sob medida.</td>
           <td class="role">Servidor <code>ml-context</code>, processo local via stdio</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>O que é global e o que é deste projeto</h3>
+  <p>
+    O servidor MCP e a memória atendem todos os projetos do ambiente; os agentes, as skills e as
+    instruções do projeto são o que cada projeto define para si. Para replicar o desenho em outro
+    projeto, a parte global já está pronta e a parte do projeto é copiada e adaptada.
+  </p>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Elemento</th><th>Escopo</th><th>Neste projeto</th><th>Em um projeto novo</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="path">Servidor ml-context</td>
+          <td class="role">Global</td>
+          <td class="role">Registrado no escopo de usuário</td>
+          <td class="role">Nada a fazer: já disponível</td>
+        </tr>
+        <tr>
+          <td class="path">Memória (knowledge.db)</td>
+          <td class="role">Global, particionada</td>
+          <td class="role">Partição <code>price_prediction_california_housing</code></td>
+          <td class="role">Gravar com o nome do novo projeto em <code>project</code></td>
+        </tr>
+        <tr>
+          <td class="path">Agentes</td>
+          <td class="role">Projeto</td>
+          <td class="role">9 papéis em <code>.claude/agents/</code></td>
+          <td class="role">Copiar e trocar os exemplos e as regras específicas do domínio</td>
+        </tr>
+        <tr>
+          <td class="path">Skills</td>
+          <td class="role">Projeto</td>
+          <td class="role">Comandos em <code>.claude/skills/</code></td>
+          <td class="role">Escrever as do novo domínio</td>
+        </tr>
+        <tr>
+          <td class="path">CLAUDE.md do projeto</td>
+          <td class="role">Projeto</td>
+          <td class="role">Objetivo, dataset, métricas, fase, decisões</td>
+          <td class="role">Preencher com o novo problema</td>
+        </tr>
+        <tr>
+          <td class="path">Permissões</td>
+          <td class="role">Projeto</td>
+          <td class="role">Allowlist em <code>.claude/settings.local.json</code></td>
+          <td class="role">Copiar a allowlist das ferramentas MCP</td>
         </tr>
       </tbody>
     </table>
@@ -752,6 +804,14 @@
     costura as duas.
   </p>
 
+  <p>
+    Os registros deste projeto ficam na partição <code>price_prediction_california_housing</code>:
+    a decisão de alertar predições a partir de $450k, o diagnóstico do gap de erro na região Sul
+    Costa, a descoberta de que o target truncado vale 5.000010 e não 5.0, os hiperparâmetros do
+    XGBoost vencedor. É esse tipo de conteúdo que uma sessão nova recupera antes de propor algo
+    que já foi testado ou descartado.
+  </p>
+
   <h3>Gravação — <code>save_knowledge</code></h3>
 
   <figure>
@@ -922,7 +982,7 @@
   <h2>Um time com papéis, fases e portões</h2>
 
   <p>
-    Os agentes são arquivos Markdown em <code>.claude/agents/</code>. Cada um define uma identidade,
+    Os agentes deste projeto são arquivos Markdown em <code>.claude/agents/</code>. Cada um define uma identidade,
     as especialidades, a fase do CRISP-DM em que atua, o formato da resposta, o viés que defende em
     debates e a regra de registro na memória. Um agente é, portanto, uma instrução de papel: o que
     separa o auditor do cientista é o que cada arquivo manda priorizar e questionar.
@@ -1037,6 +1097,16 @@
     modelo intermediário.
   </p>
 
+  <div class="note">
+    <span class="lbl">O que é genérico e o que é do domínio</span>
+    <p>
+      A maior parte de cada agente vale para qualquer projeto de ML: identidade, checklist,
+      formato de resposta, viés em debates. Algumas regras são deste domínio, como o alerta de
+      teto do <code>engenheiro_mlops</code>, que marca predições a partir de $450k porque o
+      dataset truncou os valores acima de $500k. Ao replicar, essas regras são o que se troca.
+    </p>
+  </div>
+
   <h3>Protocolo de debate</h3>
   <p>
     O coordenador abre um debate quando há mais de uma abordagem viável, quando a decisão pesa em
@@ -1063,14 +1133,15 @@
       <tbody>
         <tr><td class="path">Global</td><td class="path">~/.claude/CLAUDE.md</td><td class="role">Preferências de comunicação e convenções de código válidas para qualquer projeto.</td></tr>
         <tr><td class="path">Área</td><td class="path">Ciencia_de_dados/CLAUDE.md</td><td class="role">Hardware, stack padrão, padrões de modelagem, validação, explicabilidade e fairness, e a lista de agentes.</td></tr>
-        <tr><td class="path">Projeto</td><td class="path">&lt;projeto&gt;/.claude/CLAUDE.md</td><td class="role">Objetivo de negócio, dataset, métricas, fase CRISP-DM ativa e o histórico de decisões arquiteturais.</td></tr>
+        <tr><td class="path">Projeto</td><td class="path">.claude/CLAUDE.md</td><td class="role">Objetivo de negócio (valor mediano por block group), dataset, métricas de sucesso (RMSE, MAE, R²), fairness geográfica, fase CRISP-DM e o histórico de decisões arquiteturais.</td></tr>
       </tbody>
     </table>
   </div>
   <p>
-    Cada projeto também pode ter <strong>skills</strong> em <code>.claude/skills/</code>: comandos
-    reutilizáveis (relatório de EDA, inspeção de pipeline, status de estudos do Optuna) que os
-    agentes acionam em vez de reescrever o mesmo código.
+    O projeto também tem <strong>skills</strong> em <code>.claude/skills/</code>: comandos
+    reutilizáveis que os agentes acionam em vez de reescrever o mesmo código. Exemplos:
+    <code>/eda-report</code>, <code>/scoreboard</code>, <code>/optuna-status</code>,
+    <code>/residuals-plot</code>, <code>/geo-plot</code> e <code>/serve-model</code>.
   </p>
 </section>
 
@@ -1133,6 +1204,11 @@
       repositório, com as decisões que precisam ser públicas. O banco é o arquivo detalhado: local,
       buscável por significado, com o detalhe de experimento que não pertence a um README. Um
       registro só entra nos dois quando muda a arquitetura ou a metodologia do projeto.
+    </p>
+    <p>
+      Neste projeto, a escolha de RMSE, MAE e R² como métricas primárias e o alerta de teto em
+      $450k estão nos dois lugares. Os hiperparâmetros do XGBoost e o diagnóstico do target
+      truncado estão só no banco.
     </p>
   </div>
 
@@ -1255,8 +1331,11 @@
         <tr><td class="path">tools/mcp_check.py</td><td class="role">Sonda de saúde do hook.</td></tr>
         <tr><td class="path">~/.ml-context/knowledge.db</td><td class="role">O banco, fora de qualquer repositório.</td></tr>
         <tr><td class="path">~/.cache/huggingface/hub</td><td class="role">Cache do modelo de embeddings (~470 MB), lido em modo offline.</td></tr>
-        <tr><td class="path">&lt;projeto&gt;/.claude/agents/</td><td class="role">Definições dos agentes.</td></tr>
-        <tr><td class="path">&lt;projeto&gt;/.claude/skills/</td><td class="role">Comandos reutilizáveis do projeto.</td></tr>
+        <tr><td class="path">.claude/CLAUDE.md</td><td class="role">Instruções e histórico de decisões do projeto.</td></tr>
+        <tr><td class="path">.claude/agents/</td><td class="role">Definições dos 9 agentes do projeto.</td></tr>
+        <tr><td class="path">.claude/skills/</td><td class="role">Comandos reutilizáveis do projeto.</td></tr>
+        <tr><td class="path">.claude/settings.local.json</td><td class="role">Allowlist das ferramentas MCP.</td></tr>
+        <tr><td class="path">docs/arquitetura_sistema_contexto.html</td><td class="role">Este documento.</td></tr>
       </tbody>
     </table>
   </div>
@@ -1270,7 +1349,7 @@
 </section>
 
 <footer class="page">
-  Windows 11 · Python 3.14 · Claude Code com servidor MCP local ml-context
+  price_prediction_california_housing · Windows 11 · Python 3.14 · Claude Code com servidor MCP local ml-context
 </footer>
 
 </div>
