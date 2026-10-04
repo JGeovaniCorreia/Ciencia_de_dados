@@ -1,0 +1,1278 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sistema de Contexto ML</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+  /* Layout: single reading column of numbered sections; each section opens with a
+     typed label (overview, component, governance, operation), figures and tables
+     scroll horizontally inside their own frames. */
+  :root {
+    --ground: #eceff0;
+    --surface: #ffffff;
+    --surface-2: #f4f6f7;
+    --ink: #151b21;
+    --ink-2: #3b4750;
+    --muted: #64737d;
+    --line: #cdd6da;
+    --accent: #0e6a75;
+    --accent-soft: #d7eaec;
+    --wire: #a4472a;
+    --wire-soft: #f3e0d8;
+    --ok: #2c6b4d;
+    --warn: #8a6206;
+    --crit: #a5291f;
+
+    --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0e1216;
+      --surface: #161c22;
+      --surface-2: #1d252c;
+      --ink: #e4e9ec;
+      --ink-2: #b9c4cb;
+      --muted: #8b9aa4;
+      --line: #2c363e;
+      --accent: #4cc2cd;
+      --accent-soft: #12343a;
+      --wire: #e5915f;
+      --wire-soft: #3a2318;
+      --ok: #63b98c;
+      --warn: #d6a52f;
+      --crit: #e8776a;
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #0e1216;
+    --surface: #161c22;
+    --surface-2: #1d252c;
+    --ink: #e4e9ec;
+    --ink-2: #b9c4cb;
+    --muted: #8b9aa4;
+    --line: #2c363e;
+    --accent: #4cc2cd;
+    --accent-soft: #12343a;
+    --wire: #e5915f;
+    --wire-soft: #3a2318;
+    --ok: #63b98c;
+    --warn: #d6a52f;
+    --crit: #e8776a;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 0 72px;
+  }
+
+  /* ---------- header ---------- */
+
+  header.page {
+    border-bottom: 1px solid var(--line);
+    padding-block: 56px 32px;
+    margin-bottom: 8px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(2.1rem, 6vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -.015em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+
+  .sub {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0 0 22px;
+  }
+
+  .lead {
+    font-size: 1.05rem;
+    color: var(--ink-2);
+    max-width: 64ch;
+    margin: 0 0 28px;
+  }
+
+  dl.facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 18px 24px;
+    margin: 0;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  dl.facts div { display: flex; flex-direction: column; gap: 2px; }
+  dl.facts dt {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  dl.facts dd {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  /* ---------- table of contents ---------- */
+
+  nav.toc { padding-block: 28px 4px; }
+  nav.toc ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 6px 24px;
+  }
+  nav.toc li { display: flex; gap: 10px; align-items: baseline; min-width: 0; }
+  nav.toc .n {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  nav.toc a { color: var(--ink-2); text-decoration: none; font-size: 14px; }
+  nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+
+  /* ---------- sections ---------- */
+
+  section { padding-block: 44px 8px; }
+  section + section, nav.toc + section { border-top: 1px solid var(--line); }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.45rem;
+    letter-spacing: -.01em;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-size: .98rem;
+    font-weight: 600;
+    margin: 30px 0 8px;
+    color: var(--ink);
+  }
+
+  p { max-width: 68ch; margin: 0 0 14px; color: var(--ink-2); }
+  p strong { color: var(--ink); font-weight: 600; }
+
+  code {
+    font-family: var(--mono);
+    font-size: .855em;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: .06em .32em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  ul.plain { margin: 0 0 16px; padding-left: 20px; max-width: 68ch; }
+  ul.plain li { color: var(--ink-2); margin-bottom: 7px; }
+
+  /* ---------- figures ---------- */
+
+  figure {
+    margin: 26px 0 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .fig-scroll { overflow-x: auto; padding: 18px 18px 6px; }
+  figure svg { display: block; max-width: 100%; height: auto; min-width: 660px; color: var(--ink); }
+
+  /* Diagram hues resolve through the theme tokens: CSS beats the SVG
+     presentation attribute, so the literal hex is only the light-mode value. */
+  figure svg [fill="#0e6a75"]   { fill: var(--accent); }
+  figure svg [stroke="#0e6a75"] { stroke: var(--accent); }
+  figure svg [fill="#a4472a"]   { fill: var(--wire); }
+  figure svg [stroke="#a4472a"] { stroke: var(--wire); }
+  figure svg [fill="#a5291f"]   { fill: var(--crit); }
+  figure svg [stroke="#a5291f"] { stroke: var(--crit); }
+  figure svg [fill="#2c6b4d"]   { fill: var(--ok); }
+  figure svg [stroke="#2c6b4d"] { stroke: var(--ok); }
+  figcaption {
+    border-top: 1px solid var(--line);
+    background: var(--surface-2);
+    padding: 11px 18px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--muted);
+  }
+  figcaption b { color: var(--ink-2); font-weight: 600; }
+
+  /* ---------- tables ---------- */
+
+  .t-scroll { overflow-x: auto; margin: 20px 0 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.path { font-family: var(--mono); font-size: 11.5px; color: var(--ink); white-space: nowrap; }
+  td.role { color: var(--ink-2); }
+
+  .chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .chip.opus { color: var(--accent); }
+  .chip.sonnet { color: var(--muted); }
+
+  /* ---------- callout ---------- */
+
+  .note {
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 14px 18px;
+    margin: 22px 0;
+    max-width: 72ch;
+  }
+  .note.fault { border-left-color: var(--crit); }
+  .note p { margin: 0; max-width: none; font-size: 14px; }
+  .note p + p { margin-top: 8px; }
+  .note .lbl {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 5px;
+  }
+  .note.fault .lbl { color: var(--crit); }
+
+  /* ---------- code block ---------- */
+
+  pre {
+    margin: 16px 0;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  pre .c { color: var(--muted); }
+  pre .k { color: var(--accent); }
+
+  footer.page {
+    border-top: 1px solid var(--line);
+    margin-top: 40px;
+    padding-top: 22px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (max-width: 520px) {
+    section { padding-block: 34px 6px; }
+    .fig-scroll { padding: 14px 14px 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <p class="eyebrow">Arquitetura de referência · ciência de dados assistida por IA</p>
+  <h1>Sistema de Contexto ML</h1>
+  <p class="sub">agentes especializados · memória RAG · protocolo MCP</p>
+  <p class="lead">
+    Como o Claude Code trabalha nos projetos de ciência de dados deste repositório: um time de
+    agentes com papéis definidos conduz o ciclo CRISP-DM, uma memória vetorial guarda decisões e
+    aprendizados entre sessões, e o protocolo MCP liga as duas coisas. O documento descreve cada
+    peça, como elas se conectam e como o sistema é operado.
+  </p>
+  <dl class="facts">
+    <div><dt>Agentes</dt><dd>9</dd></div>
+    <div><dt>Ferramentas MCP</dt><dd>5</dd></div>
+    <div><dt>Dimensões do vetor</dt><dd>384</dd></div>
+    <div><dt>Handshake</dt><dd>~1,3 s</dd></div>
+    <div><dt>Limite do cliente</dt><dd>90 s</dd></div>
+  </dl>
+</header>
+
+<nav class="toc" aria-label="Sumário">
+  <ol>
+    <li><span class="n">1</span><a href="#visao-geral">Visão geral</a></li>
+    <li><span class="n">2</span><a href="#protocolo">Protocolo MCP</a></li>
+    <li><span class="n">3</span><a href="#servidor">Servidor ml-context</a></li>
+    <li><span class="n">4</span><a href="#memoria">Memória RAG</a></li>
+    <li><span class="n">5</span><a href="#agentes">Sistema multiagentes</a></li>
+    <li><span class="n">6</span><a href="#governanca">Governança</a></li>
+    <li><span class="n">7</span><a href="#operacao">Operação</a></li>
+  </ol>
+</nav>
+
+<!-- ================= 1. VISÃO GERAL ================= -->
+<section id="visao-geral">
+  <p class="tag">1 · Visão geral</p>
+  <h2>Três peças, três responsabilidades</h2>
+
+  <p>
+    O sistema existe para que o trabalho com IA em projetos de ML siga método e não perca
+    contexto. Cada peça responde a uma pergunta diferente, e nenhuma faz o trabalho das outras.
+  </p>
+
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Peça</th><th>Responde a</th><th>Onde está</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="path">Sistema multiagentes</td>
+          <td class="role">Quem trabalha em cada fase, em que ordem, e quando algo merece ser registrado.</td>
+          <td class="role"><code>CLAUDE.md</code> em três níveis e <code>.claude/agents/</code></td>
+        </tr>
+        <tr>
+          <td class="path">Memória RAG</td>
+          <td class="role">O que já foi decidido, aprendido ou descartado em sessões anteriores.</td>
+          <td class="role">SQLite com <code>sqlite-vec</code> e um modelo de embeddings local</td>
+        </tr>
+        <tr>
+          <td class="path">Protocolo MCP</td>
+          <td class="role">Como o Claude Code alcança a memória sem código sob medida.</td>
+          <td class="role">Servidor <code>ml-context</code>, processo local via stdio</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 880 300" role="img" aria-label="Diagrama: o dono do projeto conversa com o Claude Code. Dentro do Claude Code, o contexto em três níveis orienta o sistema multiagentes, que age pelo cliente MCP. O cliente MCP fala por stdio com o processo do servidor ml-context, que usa o modelo de embeddings e o banco knowledge.db.">
+        <defs>
+          <marker id="o1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="currentColor"></polygon>
+          </marker>
+          <marker id="o1w" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="#a4472a"></polygon>
+          </marker>
+        </defs>
+
+        <!-- owner -->
+        <rect x="20" y="122" width="130" height="58" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".6"></rect>
+        <text x="85" y="147" text-anchor="middle" font-size="12.5" font-weight="500" fill="currentColor">Dono do projeto</text>
+        <text x="85" y="166" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".66">pede, revisa, decide</text>
+        <line x1="150" y1="151" x2="186" y2="151" stroke="currentColor" stroke-width="1.4" marker-end="url(#o1)"></line>
+
+        <!-- host container -->
+        <rect x="190" y="30" width="360" height="248" rx="8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4" opacity=".45"></rect>
+        <text x="206" y="22" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="1.2" fill="currentColor" opacity=".6">CLAUDE CODE · HOST</text>
+
+        <rect x="210" y="48" width="320" height="58" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="226" y="72" font-size="12.5" font-weight="500" fill="currentColor">Contexto em três níveis</text>
+        <text x="226" y="92" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">CLAUDE.md global · área · projeto</text>
+        <line x1="370" y1="106" x2="370" y2="124" stroke="currentColor" stroke-width="1.3" marker-end="url(#o1)"></line>
+
+        <rect x="210" y="124" width="320" height="58" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1.4"></rect>
+        <text x="226" y="148" font-size="12.5" font-weight="500" fill="currentColor">Sistema multiagentes</text>
+        <text x="226" y="168" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">9 papéis · coordenador orquestra</text>
+        <line x1="370" y1="182" x2="370" y2="200" stroke="currentColor" stroke-width="1.3" marker-end="url(#o1)"></line>
+
+        <rect x="210" y="200" width="320" height="58" rx="5" fill="#a4472a" fill-opacity=".07" stroke="#a4472a" stroke-width="1.3"></rect>
+        <text x="226" y="224" font-size="12.5" font-weight="500" fill="currentColor">Cliente MCP</text>
+        <text x="226" y="244" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">intenção do modelo → JSON-RPC</text>
+
+        <!-- wire -->
+        <polyline points="530,229 584,229 584,77 632,77" fill="none" stroke="#a4472a" stroke-width="1.6" marker-start="url(#o1w)" marker-end="url(#o1w)"></polyline>
+        <text x="592" y="160" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a4472a">MCP</text>
+        <text x="592" y="174" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a4472a">stdio</text>
+
+        <!-- server container -->
+        <rect x="632" y="30" width="228" height="248" rx="8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4" opacity=".45"></rect>
+        <text x="648" y="22" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="1.2" fill="currentColor" opacity=".6">PROCESSO PYTHON LOCAL</text>
+
+        <rect x="648" y="48" width="196" height="58" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="662" y="72" font-size="12.5" font-weight="500" fill="currentColor">servidor ml-context</text>
+        <text x="662" y="92" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">5 ferramentas</text>
+        <line x1="746" y1="106" x2="746" y2="124" stroke="currentColor" stroke-width="1.3" marker-end="url(#o1)"></line>
+
+        <rect x="648" y="124" width="196" height="58" rx="5" fill="#0e6a75" fill-opacity=".08" stroke="#0e6a75" stroke-width="1.3"></rect>
+        <text x="662" y="148" font-size="12.5" font-weight="500" fill="currentColor">embeddings</text>
+        <text x="662" y="168" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">multilingual-e5-small</text>
+        <line x1="746" y1="182" x2="746" y2="200" stroke="currentColor" stroke-width="1.3" marker-end="url(#o1)"></line>
+
+        <rect x="648" y="200" width="196" height="58" rx="5" fill="#0e6a75" fill-opacity=".08" stroke="#0e6a75" stroke-width="1.3"></rect>
+        <text x="662" y="224" font-size="12.5" font-weight="500" fill="currentColor">knowledge.db</text>
+        <text x="662" y="244" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">SQLite + sqlite-vec</text>
+      </svg>
+    </div>
+    <figcaption>
+      <b>O contexto orienta, os agentes agem, o protocolo transporta.</b> Tudo à esquerda da linha
+      MCP vive dentro do Claude Code e é texto (instruções e definições de agentes). Tudo à direita
+      é um processo Python local, com o modelo de embeddings e o banco no próprio computador.
+    </figcaption>
+  </figure>
+</section>
+
+<!-- ================= 2. PROTOCOLO ================= -->
+<section id="protocolo">
+  <p class="tag">2 · Componente · Protocolo MCP</p>
+  <h2>Um protocolo, não uma linguagem</h2>
+
+  <p>
+    MCP (Model Context Protocol) é um acordo sobre mensagens que padroniza como uma aplicação
+    que hospeda um modelo conversa com capacidades externas. Reaproveita JSON-RPC 2.0 e define
+    apenas quais mensagens valem e o que cada uma carrega. O problema que resolve é
+    combinatório: sem um padrão, cada aplicação precisa de código sob medida para cada fonte de
+    dados, <strong>N×M integrações</strong>; com ele, cada lado implementa o protocolo uma vez,
+    <strong>N+M</strong>. O precedente direto é o LSP (Language Server Protocol), que fez o mesmo
+    entre editores e linguagens.
+  </p>
+
+  <p>
+    A direção é vertical: um host ligado a várias capacidades. Comunicação entre agentes pares
+    é outro problema, resolvido por outros protocolos, como o A2A.
+  </p>
+
+  <h3>As três primitivas, por quem decide usar</h3>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Primitiva</th><th>Quem decide</th><th>O que é</th><th>No ml-context</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="path">Tools</td><td class="role">o modelo</td><td class="role">Funções com efeito: consultar, gravar, executar.</td><td class="role">As 5 ferramentas da seção 4.</td></tr>
+        <tr><td class="path">Resources</td><td class="role">a aplicação</td><td class="role">Dados legíveis por URI: arquivos, registros, páginas.</td><td class="role">Não usa.</td></tr>
+        <tr><td class="path">Prompts</td><td class="role">o humano</td><td class="role">Templates de prompt reutilizáveis, expostos como slash commands.</td><td class="role">Não usa.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    Há ainda o <strong>sampling</strong>, que inverte a direção: o servidor pede uma inferência
+    ao modelo do cliente. Serve a um servidor que precisa de julgamento sem ter modelo próprio.
+  </p>
+
+  <p>
+    O que sustenta o desenho é a <strong>descoberta em tempo de execução</strong>. Ao conectar, o
+    cliente pergunta o que existe e recebe nomes, descrições e JSON Schemas, sem que nenhum lado
+    conheça o outro de antemão. Por isso um servidor escrito hoje funciona num host que ainda
+    não existe. O custo é que a qualidade da integração passa a depender da descrição e do schema.
+  </p>
+
+  <div class="note">
+    <span class="lbl">O modelo não fala MCP</span>
+    <p>
+      O modelo emite a intenção de chamar uma ferramenta. O cliente traduz para JSON-RPC, aplica
+      a política de permissão, executa e devolve o resultado como texto. É por isso que o Claude
+      Code pode negar uma chamada sem que o servidor saiba que ela foi pedida, e é por isso que a
+      allowlist de permissões (seção 6) funciona.
+    </p>
+    <p>
+      O protocolo não raciocina, não planeja e não guarda memória. Também não tem transporte
+      próprio: roda sobre stdio, como aqui, ou sobre HTTP com streaming.
+    </p>
+  </div>
+
+  <h3>Onde termina a especificação e começa o código</h3>
+
+  <p>
+    Quem implementa o protocolo é o <strong>SDK oficial</strong> (pacote <code>mcp</code>). O
+    código do servidor apenas registra funções e as deixa serem chamadas.
+  </p>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 880 300" role="img" aria-label="Diagrama: o cliente Claude Code conversa por stdio com um processo Python, onde o pacote mcp implementa o protocolo e mcp_server.py contém apenas a regra de negócio.">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="currentColor"></polygon>
+          </marker>
+          <marker id="a1w" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="#a4472a"></polygon>
+          </marker>
+        </defs>
+
+        <line x1="345" y1="52" x2="345" y2="248" stroke="currentColor" stroke-width="1" stroke-dasharray="3 5" opacity=".38"></line>
+        <text x="345" y="272" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".62">stdio — JSON-RPC 2.0 sobre stdin/stdout</text>
+
+        <rect x="25" y="92" width="250" height="108" rx="6" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"></rect>
+        <text x="150" y="124" text-anchor="middle" font-size="13.5" font-weight="500" fill="currentColor">Claude Code</text>
+        <text x="150" y="145" text-anchor="middle" font-size="11.5" fill="currentColor" opacity=".72">cliente MCP (o host)</text>
+        <text x="150" y="172" text-anchor="middle" font-size="11" fill="currentColor" opacity=".55">implementação de terceiros,</text>
+        <text x="150" y="187" text-anchor="middle" font-size="11" fill="currentColor" opacity=".55">externa ao projeto e não em Python</text>
+
+        <rect x="415" y="40" width="440" height="220" rx="8" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="5 4" opacity=".45"></rect>
+        <text x="435" y="31" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="1.2" fill="currentColor" opacity=".6">PROCESSO PYTHON · SPAWN PELO CLIENTE</text>
+
+        <rect x="435" y="62" width="400" height="82" rx="5" fill="currentColor" fill-opacity=".045" stroke="currentColor" stroke-width="1" opacity=".9"></rect>
+        <text x="455" y="86" font-size="12.5" font-weight="500" fill="currentColor">pacote mcp — SDK oficial</text>
+        <text x="455" y="106" font-size="11" fill="currentColor" opacity=".66">framing JSON-RPC · handshake · dispatch de mensagem</text>
+        <text x="455" y="124" font-size="11" fill="currentColor" opacity=".66">dependência externa</text>
+
+        <line x1="635" y1="144" x2="635" y2="172" stroke="currentColor" stroke-width="1.4" marker-end="url(#a1)"></line>
+        <text x="648" y="163" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="currentColor" opacity=".8">@server.call_tool()</text>
+
+        <rect x="435" y="172" width="400" height="72" rx="5" fill="#0e6a75" fill-opacity=".08" stroke="#0e6a75" stroke-width="1.6"></rect>
+        <text x="455" y="196" font-size="12.5" font-weight="500" fill="currentColor">mcp_server.py — código do sistema</text>
+        <text x="455" y="214" font-size="11" fill="currentColor" opacity=".7">5 handlers · schema SQLite · embeddings</text>
+        <text x="455" y="233" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="500" fill="#0e6a75">zero linhas de JSON-RPC</text>
+
+        <line x1="275" y1="116" x2="430" y2="116" stroke="#a4472a" stroke-width="1.6" marker-end="url(#a1w)"></line>
+        <text x="352" y="106" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#a4472a">tools/call</text>
+        <line x1="430" y1="158" x2="275" y2="158" stroke="#a4472a" stroke-width="1.6" marker-end="url(#a1w)"></line>
+        <text x="352" y="176" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="#a4472a">resultado</text>
+      </svg>
+    </div>
+    <figcaption>
+      <b>Duas metades, três autores.</b> O cliente é implementação da Anthropic; o protocolo,
+      especificação pública implementada pelo SDK; somente o bloco inferior é código do sistema.
+      A analogia exata é HTTP / Flask / <code>app.py</code>.
+    </figcaption>
+  </figure>
+
+  <p>
+    O acoplamento com o protocolo tem duas linhas. Os decorators registram a função; o SDK a
+    invoca quando a mensagem correspondente chega pelo stdin:
+  </p>
+
+<pre><span class="k">@server.list_tools()</span>   <span class="c"># chamado ao receber tools/list</span>
+<span class="k">@server.call_tool()</span>    <span class="c"># chamado ao receber tools/call</span></pre>
+</section>
+
+<!-- ================= 3. SERVIDOR ================= -->
+<section id="servidor">
+  <p class="tag">3 · Componente · Servidor ml-context</p>
+  <h2>Arranque em segundo plano</h2>
+
+  <p>
+    O servidor é registrado no escopo de usuário, em <code>~/.claude.json</code>, e por isso fica
+    disponível em todos os projetos do ambiente. O cliente faz spawn de um <code>.bat</code> que
+    prepara o ambiente antes de iniciar o Python:
+  </p>
+
+<pre>~/.claude.json  <span class="c">→</span>  run_mcp.bat  <span class="c">→</span>  python.exe  <span class="c">→</span>  mcp_server.py
+<span class="c">   registro           HF_HUB_OFFLINE=1            intérprete     stdio_server()
+   (user scope)       TRANSFORMERS_OFFLINE=1
+                      SSL_CERT_FILE= (limpa)</span></pre>
+
+  <p>
+    O cliente conta o tempo do handshake a partir do spawn. O limite padrão é 30 s; aqui está em
+    90 s, por <code>MCP_TIMEOUT=90000</code> no <code>~/.claude/settings.json</code>. A parte cara
+    do arranque é o <code>import sentence_transformers</code>, que puxa o torch e o scipy, mais a
+    carga do modelo. Nada disso roda antes do handshake: o import do módulo só carrega
+    <code>mcp</code> e <code>sqlite_vec</code>, e o resto acontece em três peças.
+  </p>
+
+<pre><span class="k">def</span> get_model():                         <span class="c"># import + carga sob demanda,</span>
+    <span class="k">with</span> _model_lock:                      <span class="c"># protegidos por lock</span>
+        <span class="k">if</span> _model <span class="k">is None</span>:
+            <span class="k">from</span> sentence_transformers <span class="k">import</span> SentenceTransformer
+            _model = SentenceTransformer(EMBEDDING_MODEL)
+    <span class="k">return</span> _model
+
+<span class="k">def</span> warm_up_model():                     <span class="c"># thread daemon disparada no main():</span>
+    get_model()                            <span class="c"># carrega enquanto o servidor já responde</span>
+
+<span class="k">def</span> detach_stdin():                      <span class="c"># o SDK lê uma cópia do stdin;</span>
+    mcp_fd = os.dup(0)                     <span class="c"># o fd 0 do processo passa a ser NUL</span>
+    os.dup2(os.open(os.devnull, os.O_RDONLY), 0)
+    <span class="k">return</span> TextIOWrapper(os.fdopen(mcp_fd, <span class="k">"rb"</span>, buffering=0), encoding=<span class="k">"utf-8"</span>)</pre>
+
+  <p>
+    Uma ferramenta chamada antes de o warm-up terminar espera pelo lock e recebe o modelo já
+    carregado. Se a carga falhar, por exemplo com o modelo fora do cache, a ferramenta devolve o
+    erro em texto e o servidor continua de pé: <code>list_knowledge</code>, que não usa vetor,
+    segue respondendo.
+  </p>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 880 248" role="img" aria-label="Gráfico de barras na escala de tempo: o initialize responde em cerca de 1,3 segundo e o modelo carrega em segundo plano por cerca de 9,5 segundos depois disso, bem abaixo do limite padrão de 30 segundos; o limite configurado é de 90 segundos.">
+        <!-- limits: default 30 s on scale, configured 90 s off scale -->
+        <line x1="690" y1="44" x2="690" y2="176" stroke="#a5291f" stroke-width="1.4" stroke-dasharray="5 4" opacity=".7"></line>
+        <text x="690" y="36" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="500" fill="#a5291f">LIMITE PADRÃO · 30 s</text>
+        <text x="812" y="16" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".62">limite configurado (MCP_TIMEOUT) · 90 s, fora da escala →</text>
+
+        <!-- row 1: handshake (~1,3 s) -->
+        <text x="150" y="62" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="1.1" fill="#0e6a75">HANDSHAKE</text>
+        <rect x="150" y="70" width="23.4" height="24" fill="#0e6a75" fill-opacity=".85"></rect>
+        <line x1="173.4" y1="66" x2="173.4" y2="98" stroke="currentColor" stroke-width="1.2"></line>
+        <text x="185" y="87" font-size="11.5" font-weight="500" fill="currentColor">initialize respondido — ~1,3 s</text>
+
+        <!-- row 2: background warm-up (~9,5 s after the handshake) -->
+        <text x="150" y="118" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="1.1" fill="currentColor" opacity=".62">WARM-UP EM SEGUNDO PLANO</text>
+        <rect x="173.4" y="126" width="171" height="24" fill="#0e6a75" fill-opacity=".45"></rect>
+        <rect x="173.4" y="126" width="171" height="24" fill="none" stroke="#0e6a75" stroke-width="1.2" stroke-dasharray="4 3"></rect>
+        <text x="356" y="143" font-size="11" fill="currentColor" opacity=".8">~9,5 s · ferramenta chamada antes espera o restante</text>
+
+        <!-- axis: 18 px per second from x=150 -->
+        <line x1="150" y1="176" x2="812" y2="176" stroke="currentColor" stroke-width="1" opacity=".5"></line>
+        <g font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".62" text-anchor="middle">
+          <line x1="150" y1="176" x2="150" y2="182" stroke="currentColor" opacity=".5"></line><text x="150" y="195">0 s</text>
+          <line x1="240" y1="176" x2="240" y2="182" stroke="currentColor" opacity=".5"></line><text x="240" y="195">5</text>
+          <line x1="330" y1="176" x2="330" y2="182" stroke="currentColor" opacity=".5"></line><text x="330" y="195">10</text>
+          <line x1="420" y1="176" x2="420" y2="182" stroke="currentColor" opacity=".5"></line><text x="420" y="195">15</text>
+          <line x1="510" y1="176" x2="510" y2="182" stroke="currentColor" opacity=".5"></line><text x="510" y="195">20</text>
+          <line x1="600" y1="176" x2="600" y2="182" stroke="currentColor" opacity=".5"></line><text x="600" y="195">25</text>
+          <line x1="690" y1="176" x2="690" y2="182" stroke="currentColor" opacity=".5"></line><text x="690" y="195">30</text>
+          <line x1="780" y1="176" x2="780" y2="182" stroke="currentColor" opacity=".5"></line><text x="780" y="195">35</text>
+        </g>
+
+        <!-- legend -->
+        <g font-size="10.5" fill="currentColor">
+          <rect x="150" y="220" width="12" height="12" fill="#0e6a75" fill-opacity=".85"></rect>
+          <text x="168" y="230" opacity=".78">mcp + sqlite_vec</text>
+          <rect x="300" y="220" width="12" height="12" fill="#0e6a75" fill-opacity=".45"></rect>
+          <text x="318" y="230" opacity=".78">sentence_transformers + modelo de embeddings</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>
+      <b>O handshake não espera o modelo.</b> O <code>initialize</code> responde depois dos imports
+      leves, e o modelo carrega numa thread logo em seguida. Quando o primeiro comando chega, ele
+      normalmente já está pronto. Tempos com cache de disco quente; com cache frio o warm-up fica
+      mais longo, sem afetar o handshake.
+    </figcaption>
+  </figure>
+
+  <div class="note fault">
+    <span class="lbl">Por que o stdin é desacoplado</span>
+    <p>
+      O transporte stdio deixa uma leitura pendente no stdin entre as mensagens. No Windows, uma
+      leitura síncrona pendente num pipe bloqueia as outras operações sobre o mesmo handle. Ao
+      importar o <code>sentence_transformers</code>, a DLL de <code>scipy.special</code> consulta
+      o stdin durante a inicialização e ficaria esperando a próxima mensagem do cliente.
+    </p>
+    <p>
+      Isso vale tanto para a thread de warm-up quanto para uma carga feita só na primeira
+      ferramenta. <code>detach_stdin()</code> evita o bloqueio: o SDK lê uma cópia do handle e o
+      stdin do processo aponta para <code>NUL</code>.
+    </p>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Decisão · arranque em segundo plano</span>
+    <p>
+      Com o modelo carregado no import, o handshake levava cerca de 10 s com cache quente e
+      passava dos 30 s logo após ligar o computador, deixando a sessão inteira sem memória. Mover
+      a carga para depois do handshake elimina a dependência entre o tempo de arranque e o
+      tamanho do modelo. O <code>MCP_TIMEOUT</code> de 90 s fica como rede de segurança: é um
+      teto, e só custa tempo quando o servidor está quebrado.
+    </p>
+  </div>
+</section>
+
+<!-- ================= 4. MEMÓRIA ================= -->
+<section id="memoria">
+  <p class="tag">4 · Componente · Memória RAG</p>
+  <h2>Uma memória que o modelo lê e escreve</h2>
+
+  <p>
+    No RAG clássico, toda pergunta passa por uma busca antes de chegar ao modelo, sobre uma base
+    de documentos fixa. Aqui o modelo decide <strong>quando</strong> buscar, chamando
+    <code>search_knowledge</code> como qualquer outra ferramenta, e também <strong>grava</strong>:
+    decisões e aprendizados de uma sessão viram contexto recuperável nas seguintes. É uma memória
+    de longo prazo agêntica, e a regra de quando gravar fica na governança (seção 6).
+  </p>
+
+  <p>
+    O banco é um SQLite em <code>~/.ml-context/knowledge.db</code>, fora de qualquer repositório,
+    com a extensão <code>sqlite-vec</code> carregada em cada conexão. Os metadados vivem numa
+    tabela relacional; os vetores, numa tabela virtual <code>vec0</code>. O <code>id</code> é o que
+    costura as duas.
+  </p>
+
+  <h3>Gravação — <code>save_knowledge</code></h3>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 800 232" role="img" aria-label="Fluxo de gravação: a chamada save_knowledge gera um embedding do prefixo passage mais título e conteúdo com o modelo multilingual-e5-small, insere na tabela knowledge obtendo o id, e insere o mesmo id com o vetor em knowledge_vec.">
+        <defs>
+          <marker id="a3" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="#0e6a75"></polygon>
+          </marker>
+        </defs>
+
+        <rect x="20" y="72" width="178" height="86" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1" opacity=".95"></rect>
+        <text x="36" y="102" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" fill="currentColor">save_knowledge()</text>
+        <text x="36" y="124" font-size="11" fill="currentColor" opacity=".7">title, content, project,</text>
+        <text x="36" y="140" font-size="11" fill="currentColor" opacity=".7">category, crisp_phase…</text>
+
+        <line x1="198" y1="115" x2="244" y2="115" stroke="#0e6a75" stroke-width="1.6" marker-end="url(#a3)"></line>
+
+        <rect x="244" y="62" width="178" height="106" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="260" y="86" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" fill="currentColor">embed()</text>
+        <text x="260" y="106" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">'passage: ' +</text>
+        <text x="260" y="121" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">'{title} {content}'</text>
+        <text x="260" y="140" font-size="11" fill="currentColor" opacity=".7">multilingual-e5-small</text>
+        <text x="260" y="158" font-family="IBM Plex Mono, monospace" font-size="10" fill="#0e6a75">→ 384 floats, norma 1</text>
+
+        <line x1="422" y1="115" x2="468" y2="115" stroke="#0e6a75" stroke-width="1.6" marker-end="url(#a3)"></line>
+
+        <rect x="468" y="28" width="262" height="176" rx="7" fill="none" stroke="currentColor" stroke-width="1.1" stroke-dasharray="5 4" opacity=".45"></rect>
+        <text x="468" y="20" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing=".8" fill="currentColor" opacity=".6">~/.ml-context/knowledge.db</text>
+
+        <rect x="486" y="46" width="226" height="58" rx="4" fill="#0e6a75" fill-opacity=".07" stroke="#0e6a75" stroke-width="1.2"></rect>
+        <text x="500" y="68" font-size="12.5" font-weight="500" fill="currentColor">knowledge</text>
+        <text x="500" y="89" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">INSERT → lastrowid</text>
+
+        <line x1="599" y1="104" x2="599" y2="128" stroke="#0e6a75" stroke-width="1.6" marker-end="url(#a3)"></line>
+        <text x="610" y="120" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="500" fill="#0e6a75">mesmo id</text>
+
+        <rect x="486" y="128" width="226" height="58" rx="4" fill="#0e6a75" fill-opacity=".07" stroke="#0e6a75" stroke-width="1.2"></rect>
+        <text x="500" y="150" font-size="12.5" font-weight="500" fill="currentColor">knowledge_vec</text>
+        <text x="500" y="171" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">INSERT (id, embedding, project)</text>
+      </svg>
+    </div>
+    <figcaption>
+      <b>O título entra no vetor.</b> O embedding vem de <code>'{title} {content}'</code>
+      concatenados, com o prefixo <code>passage: </code> que a família e5 exige para documentos.
+      Por isso títulos descritivos melhoram a recuperação meses depois.
+    </figcaption>
+  </figure>
+
+  <h3>Busca — <code>search_knowledge</code></h3>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 880 278" role="img" aria-label="Fluxo de busca: a query recebe o prefixo query e é embedada, roda KNN cosseno em knowledge_vec filtrado pela partição do projeto, junta com knowledge pelo id aplicando filtros de categoria e fase, e dobra o k quando o resultado permanece abaixo do limit.">
+        <defs>
+          <marker id="a4" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="#a4472a"></polygon>
+          </marker>
+        </defs>
+
+        <rect x="20" y="86" width="170" height="86" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="34" y="116" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="500" fill="currentColor">search_knowledge()</text>
+        <text x="34" y="138" font-size="11" fill="currentColor" opacity=".7">query em linguagem</text>
+        <text x="34" y="153" font-size="11" fill="currentColor" opacity=".7">natural + filtros</text>
+
+        <line x1="190" y1="129" x2="222" y2="129" stroke="#a4472a" stroke-width="1.6" marker-end="url(#a4)"></line>
+
+        <rect x="222" y="86" width="150" height="86" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="236" y="111" font-family="IBM Plex Mono, monospace" font-size="11" font-weight="500" fill="currentColor">embed(query)</text>
+        <text x="236" y="134" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">'query: ' + query</text>
+        <text x="236" y="149" font-size="11" fill="currentColor" opacity=".7">mesmo modelo e espaço</text>
+        <text x="236" y="166" font-family="IBM Plex Mono, monospace" font-size="10" fill="#a4472a">→ 384 floats</text>
+
+        <polyline points="372,129 384,129 384,80 398,80" fill="none" stroke="#a4472a" stroke-width="1.6" marker-end="url(#a4)"></polyline>
+        <text x="392" y="106" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="500" fill="#a4472a">①</text>
+
+        <rect x="398" y="40" width="204" height="80" rx="5" fill="#a4472a" fill-opacity=".07" stroke="#a4472a" stroke-width="1.3"></rect>
+        <text x="412" y="63" font-size="12.5" font-weight="500" fill="currentColor">knowledge_vec</text>
+        <text x="412" y="83" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".78">MATCH ? AND project = ?</text>
+        <text x="412" y="98" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".78">AND k = ?  → ids + distância</text>
+        <text x="412" y="113" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#a4472a">KNN cosseno dentro da partição</text>
+
+        <line x1="602" y1="80" x2="638" y2="80" stroke="#a4472a" stroke-width="1.6" marker-end="url(#a4)"></line>
+        <text x="614" y="70" font-family="IBM Plex Mono, monospace" font-size="10" font-weight="500" fill="#a4472a">②</text>
+
+        <rect x="638" y="40" width="212" height="80" rx="5" fill="#a4472a" fill-opacity=".07" stroke="#a4472a" stroke-width="1.3"></rect>
+        <text x="652" y="63" font-size="12.5" font-weight="500" fill="currentColor">knowledge</text>
+        <text x="652" y="83" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".78">SELECT … WHERE id IN (ids)</text>
+        <text x="652" y="98" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".78">AND category = ?</text>
+        <text x="652" y="113" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".78">AND crisp_phase = ?</text>
+
+        <polyline points="700,120 700,168 470,168 470,120" fill="none" stroke="#a4472a" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a4)"></polyline>
+        <text x="585" y="186" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" font-weight="500" fill="#a4472a">③ len(rows) &lt; limit  →  k *= 2</text>
+        <text x="585" y="201" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".62">overfetch adaptativo</text>
+
+        <polyline points="820,120 820,236 638,236" fill="none" stroke="#a4472a" stroke-width="1.6" marker-end="url(#a4)"></polyline>
+        <rect x="398" y="210" width="240" height="52" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="412" y="232" font-size="11.5" font-weight="500" fill="currentColor">④ ordena por 1 − distância</text>
+        <text x="412" y="250" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".7">corta em limit · devolve markdown</text>
+      </svg>
+    </div>
+    <figcaption>
+      <b>Duas estratégias de filtro, por um motivo.</b> <code>project</code> é
+      <em>partition key</em> em <code>knowledge_vec</code>, então entra dentro do KNN: nenhum
+      candidato do projeto certo é expulso por vizinhos de outro projeto. <code>category</code> e
+      <code>crisp_phase</code> não são, e se aplicam depois; por isso o loop que dobra o
+      <code>k</code> até preencher o <code>limit</code> ou esgotar a partição.
+    </figcaption>
+  </figure>
+
+  <h3>Escolhas do índice vetorial</h3>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Escolha</th><th>Por quê</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="path">multilingual-e5-small</td>
+          <td class="role">A memória é escrita em português. Num benchmark de buscas parafraseadas, o modelo multilíngue levou o MRR de 0,39 (com o <code>all-MiniLM-L6-v2</code>, treinado em inglês) para 0,74, e aceita textos de até 512 tokens. Roda em CPU.</td>
+        </tr>
+        <tr>
+          <td class="path">prefixos query / passage</td>
+          <td class="role">A família e5 foi treinada com prefixos distintos para pergunta e documento. Omitir os prefixos degrada a recuperação.</td>
+        </tr>
+        <tr>
+          <td class="path">distance_metric=cosine</td>
+          <td class="role">É a métrica para a qual modelos de sentence embeddings são treinados. O padrão do <code>vec0</code> é L2.</td>
+        </tr>
+        <tr>
+          <td class="path">project como partition key</td>
+          <td class="role">Filtra por projeto dentro do KNN, sem depender de um overfetch de tamanho fixo que um projeto pequeno pode não alcançar.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Leitura da similaridade</span>
+    <p>
+      As similaridades do e5 ficam comprimidas, em geral entre 0,8 e 0,9 no topo. O percentual
+      exibido pela busca serve para ordenar resultados, não como limiar de relevância. Trocar o
+      modelo exige recalcular todos os vetores, porque vetores de modelos diferentes vivem em
+      espaços diferentes (seção 7).
+    </p>
+  </div>
+
+  <h3>As cinco ferramentas</h3>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Ferramenta</th><th>O que faz</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="path">save_knowledge</td><td class="role">Embeda e grava nas duas tabelas. Devolve o <code>id</code>.</td></tr>
+        <tr><td class="path">search_knowledge</td><td class="role">KNN cosseno + filtros + overfetch adaptativo.</td></tr>
+        <tr><td class="path">list_knowledge</td><td class="role">Listagem cronológica de um projeto. Não usa o modelo, então responde mesmo se a carga dele falhar.</td></tr>
+        <tr><td class="path">update_knowledge</td><td class="role">Atualização parcial. Re-embeda só se título ou conteúdo mudaram; <code>vec0</code> não aceita <code>UPDATE</code>, então recria a linha.</td></tr>
+        <tr><td class="path">delete_knowledge</td><td class="role">Remove das duas tabelas pelo <code>id</code>.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 5. AGENTES ================= -->
+<section id="agentes">
+  <p class="tag">5 · Componente · Sistema multiagentes</p>
+  <h2>Um time com papéis, fases e portões</h2>
+
+  <p>
+    Os agentes são arquivos Markdown em <code>.claude/agents/</code>. Cada um define uma identidade,
+    as especialidades, a fase do CRISP-DM em que atua, o formato da resposta, o viés que defende em
+    debates e a regra de registro na memória. Um agente é, portanto, uma instrução de papel: o que
+    separa o auditor do cientista é o que cada arquivo manda priorizar e questionar.
+  </p>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 880 316" role="img" aria-label="Diagrama do fluxo CRISP-DM: o coordenador de projeto orquestra sete etapas em sequência, de negócio a implantação, cada uma com seus agentes; o tech lead é um portão obrigatório entre avaliação e implantação; o arquiteto de soluções decide debates em qualquer etapa; o chief data scientist avalia o ciclo inteiro ao final, fora do processo.">
+        <defs>
+          <marker id="g1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="currentColor"></polygon>
+          </marker>
+          <marker id="g1w" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="#a4472a"></polygon>
+          </marker>
+        </defs>
+
+        <!-- coordinator -->
+        <rect x="20" y="16" width="840" height="44" rx="5" fill="#0e6a75" fill-opacity=".08" stroke="#0e6a75" stroke-width="1.4"></rect>
+        <text x="36" y="43" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" fill="currentColor">coordenador_projeto</text>
+        <text x="200" y="43" font-size="11" fill="currentColor" opacity=".72">orquestra a ordem e passa o resultado de um agente ao próximo; não decide mérito técnico</text>
+        <line x1="440" y1="60" x2="440" y2="78" stroke="#0e6a75" stroke-width="1.4" marker-end="url(#g1)"></line>
+
+        <!-- phase headers -->
+        <g font-family="IBM Plex Mono, monospace" font-size="9.5" letter-spacing="1" fill="currentColor" opacity=".62">
+          <text x="24" y="94">NEGÓCIO</text>
+          <text x="144" y="94">DADOS</text>
+          <text x="264" y="94">PREPARAÇÃO</text>
+          <text x="384" y="94">MODELAGEM</text>
+          <text x="504" y="94">AVALIAÇÃO</text>
+          <text x="624" y="94">PRÉ-IMPLANTAÇÃO</text>
+          <text x="744" y="94">IMPLANTAÇÃO</text>
+        </g>
+
+        <!-- phase boxes: x = 20 + i*120, width 112 -->
+        <g font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor">
+          <rect x="20" y="102" width="112" height="70" rx="4" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+          <text x="28" y="126">analista_negocios</text>
+
+          <rect x="140" y="102" width="112" height="70" rx="4" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+          <text x="148" y="126">engenheiro_dados</text>
+          <text x="148" y="144" opacity=".62">analista_negocios</text>
+
+          <rect x="260" y="102" width="112" height="70" rx="4" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+          <text x="268" y="126">engenheiro_dados</text>
+
+          <rect x="380" y="102" width="112" height="70" rx="4" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+          <text x="388" y="126">cientista_senior</text>
+          <text x="388" y="144" opacity=".62">engenheiro_dados</text>
+
+          <rect x="500" y="102" width="112" height="70" rx="4" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+          <text x="508" y="126">auditor_modelos</text>
+          <text x="508" y="144" opacity=".62">analista_negocios</text>
+
+          <rect x="620" y="102" width="112" height="70" rx="4" fill="#a5291f" fill-opacity=".06" stroke="#a5291f" stroke-width="1.4"></rect>
+          <text x="628" y="126">tech_lead</text>
+          <text x="628" y="144" fill="#a5291f">portão obrigatório</text>
+          <text x="628" y="160" fill="#a5291f">revisa src/</text>
+
+          <rect x="740" y="102" width="120" height="70" rx="4" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+          <text x="748" y="126">engenheiro_mlops</text>
+        </g>
+
+        <!-- sequence line -->
+        <line x1="20" y1="190" x2="852" y2="190" stroke="currentColor" stroke-width="1.3" opacity=".6" marker-end="url(#g1)"></line>
+        <text x="20" y="208" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="currentColor" opacity=".55">sequência CRISP-DM · em tom mais claro, agentes de apoio na etapa</text>
+
+        <!-- architect -->
+        <rect x="20" y="226" width="400" height="70" rx="5" fill="none" stroke="#a4472a" stroke-width="1.3" stroke-dasharray="5 4"></rect>
+        <text x="36" y="252" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" fill="currentColor">arquiteto_solucoes</text>
+        <text x="36" y="272" font-size="11" fill="currentColor" opacity=".72">decide debates com trade-off, em qualquer etapa;</text>
+        <text x="36" y="287" font-size="11" fill="currentColor" opacity=".72">devolve opções ranqueadas quando a decisão é do dono</text>
+
+        <!-- chief data scientist -->
+        <rect x="460" y="226" width="400" height="70" rx="5" fill="#2c6b4d" fill-opacity=".07" stroke="#2c6b4d" stroke-width="1.3"></rect>
+        <text x="476" y="252" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" fill="currentColor">chief_data_scientist</text>
+        <text x="476" y="272" font-size="11" fill="currentColor" opacity=".72">avalia o ciclo inteiro ao final, fora do processo;</text>
+        <text x="476" y="287" font-size="11" fill="currentColor" opacity=".72">aprovado · aprovado com ressalvas · reprovado</text>
+      </svg>
+    </div>
+    <figcaption>
+      <b>Quem orquestra não decide, e quem avalia não participa.</b> O coordenador controla a ordem
+      sem opinar sobre mérito técnico. O Tech Lead é um portão: a implantação só começa depois da
+      revisão do código. O Chief Data Scientist fala uma vez, no fim, com a distância de quem não
+      tomou as decisões que está avaliando.
+    </figcaption>
+  </figure>
+
+  <h3>Os nove papéis</h3>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Agente</th><th>Papel</th><th>Quando atua</th><th>Modelo recomendado</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="path">coordenador_projeto</td><td class="role">Identifica a fase, escolhe e encadeia os agentes, abre debates, atualiza o status das fases.</td><td class="role">O tempo todo</td><td><span class="chip sonnet">sonnet</span></td></tr>
+        <tr><td class="path">analista_negocios</td><td class="role">Valida o problema, a decisão apoiada, o baseline e as métricas de sucesso.</td><td class="role">Negócio, apoio em dados e avaliação</td><td><span class="chip opus">opus</span></td></tr>
+        <tr><td class="path">engenheiro_dados</td><td class="role">EDA, qualidade, leakage, feature engineering e pipelines de dados.</td><td class="role">Dados e preparação, apoio na modelagem</td><td><span class="chip sonnet">sonnet</span></td></tr>
+        <tr><td class="path">cientista_senior</td><td class="role">Baseline, comparação de algoritmos, Optuna, SHAP e calibração, com protocolo de experimento.</td><td class="role">Modelagem</td><td><span class="chip sonnet">sonnet</span></td></tr>
+        <tr><td class="path">auditor_modelos</td><td class="role">Avaliação crítica: erros por segmento, fairness, robustez, critérios de go/no-go.</td><td class="role">Avaliação</td><td><span class="chip sonnet">sonnet</span></td></tr>
+        <tr><td class="path">tech_lead</td><td class="role">Revisão de código: leakage no pipeline, serialização, modularidade, padrões.</td><td class="role">Portão pré-implantação e sob demanda</td><td><span class="chip sonnet">sonnet</span></td></tr>
+        <tr><td class="path">engenheiro_mlops</td><td class="role">Reprodutibilidade, MLflow, serving, monitoramento e critérios de retreino.</td><td class="role">Implantação, desde a preparação</td><td><span class="chip sonnet">sonnet</span></td></tr>
+        <tr><td class="path">arquiteto_solucoes</td><td class="role">Lê o debate inteiro e decide, ponderando negócio, viabilidade, robustez, custo e reversibilidade.</td><td class="role">Quando há conflito</td><td><span class="chip opus">opus</span></td></tr>
+        <tr><td class="path">chief_data_scientist</td><td class="role">Avalia o projeto completo e emite o veredicto final.</td><td class="role">Uma vez, no encerramento</td><td><span class="chip opus">opus</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    A divisão de modelos segue o tipo de trabalho: os papéis de julgamento amplo (negócio, decisão
+    de debates e veredicto final) usam o modelo mais capaz; os de execução especializada usam o
+    modelo intermediário.
+  </p>
+
+  <h3>Protocolo de debate</h3>
+  <p>
+    O coordenador abre um debate quando há mais de uma abordagem viável, quando a decisão pesa em
+    custo, tempo ou desempenho, quando ela é difícil de reverter, ou quando o dono pede uma
+    comparação. Participam ao menos dois agentes e o arquiteto:
+  </p>
+  <ul class="plain">
+    <li><strong>Rodada 1:</strong> cada agente propõe uma solução de forma independente.</li>
+    <li><strong>Rodada 2:</strong> cada agente critica a proposta do outro.</li>
+    <li><strong>Rodada 3,</strong> se necessária: cada agente refina com base nas críticas.</li>
+    <li><strong>Decisão:</strong> o arquiteto recebe o histórico completo e decide, ou devolve opções ranqueadas quando o trade-off é de negócio ou de preferência do dono.</li>
+  </ul>
+
+  <h3>Contexto em três níveis</h3>
+  <p>
+    Os agentes partem de instruções que o Claude Code carrega juntas no início da sessão, da mais
+    geral para a mais específica. Cada nível complementa o anterior com o que só vale no seu escopo.
+  </p>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Nível</th><th>Arquivo</th><th>Conteúdo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="path">Global</td><td class="path">~/.claude/CLAUDE.md</td><td class="role">Preferências de comunicação e convenções de código válidas para qualquer projeto.</td></tr>
+        <tr><td class="path">Área</td><td class="path">Ciencia_de_dados/CLAUDE.md</td><td class="role">Hardware, stack padrão, padrões de modelagem, validação, explicabilidade e fairness, e a lista de agentes.</td></tr>
+        <tr><td class="path">Projeto</td><td class="path">&lt;projeto&gt;/.claude/CLAUDE.md</td><td class="role">Objetivo de negócio, dataset, métricas, fase CRISP-DM ativa e o histórico de decisões arquiteturais.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Cada projeto também pode ter <strong>skills</strong> em <code>.claude/skills/</code>: comandos
+    reutilizáveis (relatório de EDA, inspeção de pipeline, status de estudos do Optuna) que os
+    agentes acionam em vez de reescrever o mesmo código.
+  </p>
+</section>
+
+<!-- ================= 6. GOVERNANÇA ================= -->
+<section id="governanca">
+  <p class="tag">6 · Governança</p>
+  <h2>O que vira memória, e onde</h2>
+
+  <p>
+    Nenhum componente técnico decide <em>quando</em> gravar. Essa regra está nas instruções:
+    consultar a memória com <code>search_knowledge</code> ao iniciar uma tarefa, e registrar ao
+    tomar decisões e ao fechar uma fase do CRISP-DM. É o que converte um banco vetorial em
+    disciplina de projeto.
+  </p>
+
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>O que aconteceu</th><th>Destino</th><th>Quem registra</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="role">Decisão que muda a arquitetura ou a metodologia do projeto</td>
+          <td class="role">Banco <em>e</em> tabela de histórico de decisões do <code>CLAUDE.md</code> do projeto</td>
+          <td class="role">Agente que decidiu; o coordenador confere ao fechar a fase</td>
+        </tr>
+        <tr>
+          <td class="role">Aprendizado técnico, padrão reutilizável, detalhe de experimento</td>
+          <td class="role">Só o banco</td>
+          <td class="role">Agente que aprendeu</td>
+        </tr>
+        <tr>
+          <td class="role">Decisão de debate</td>
+          <td class="role">Banco, sempre</td>
+          <td class="role">arquiteto_solucoes</td>
+        </tr>
+        <tr>
+          <td class="role">Veredicto do ciclo</td>
+          <td class="role">Banco, sempre</td>
+          <td class="role">chief_data_scientist</td>
+        </tr>
+        <tr>
+          <td class="role">Padrão problemático recorrente no código</td>
+          <td class="role">Banco</td>
+          <td class="role">tech_lead</td>
+        </tr>
+        <tr>
+          <td class="role">Finding pontual de revisão de código</td>
+          <td class="role">Não registra; fica no histórico do git</td>
+          <td class="role">—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Divisão de responsabilidades</span>
+    <p>
+      O <code>CLAUDE.md</code> é a vitrine: versionado, legível por qualquer pessoa que abra o
+      repositório, com as decisões que precisam ser públicas. O banco é o arquivo detalhado: local,
+      buscável por significado, com o detalhe de experimento que não pertence a um README. Um
+      registro só entra nos dois quando muda a arquitetura ou a metodologia do projeto.
+    </p>
+  </div>
+
+  <h3>Permissões</h3>
+  <p>
+    A allowlist do <code>settings.local.json</code> do projeto libera <code>search</code>,
+    <code>save</code>, <code>list</code> e <code>delete</code> sem confirmação.
+    <code>update_knowledge</code> fica fora e pede confirmação a cada uso, porque reescreve um
+    registro existente. Como o cliente aplica a permissão antes de falar com o servidor (seção 2),
+    essa política não exige nenhum código no servidor.
+  </p>
+</section>
+
+<!-- ================= 7. OPERAÇÃO ================= -->
+<section id="operacao">
+  <p class="tag">7 · Operação</p>
+  <h2>Verificação de saúde, backup e manutenção</h2>
+
+  <p>
+    O hook <code>SessionStart</code> roda o <code>mcp_check.py</code> no início de cada sessão e
+    faz três checagens independentes, para que uma falha não esconda as outras. A principal
+    repete o que o cliente faz: sobe o servidor pelo mesmo <code>run_mcp.bat</code>, envia
+    <code>initialize</code> e mede a resposta.
+  </p>
+
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 880 250" role="img" aria-label="Diagrama: mcp_check.py roda três checagens. Handshake real pelo run_mcp.bat com limite de 7 segundos, encerrando a árvore de processos depois; modelo de embeddings presente no cache do Hugging Face, sem carregar; banco aberto só para leitura com contagem de registros. O resultado é uma mensagem com um sinal de aprovado ou reprovado por checagem.">
+        <defs>
+          <marker id="a5" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 10,4 0,8" fill="currentColor"></polygon>
+          </marker>
+        </defs>
+
+        <rect x="20" y="88" width="186" height="74" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="34" y="113" font-family="IBM Plex Mono, monospace" font-size="11.5" font-weight="500" fill="currentColor">mcp_check.py</text>
+        <text x="34" y="133" font-size="11" fill="currentColor" opacity=".7">hook SessionStart</text>
+        <text x="34" y="151" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".5">timeout 10 000 ms</text>
+
+        <polyline points="206,125 240,125 240,48 280,48" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#a5)"></polyline>
+        <line x1="240" y1="125" x2="280" y2="125" stroke="currentColor" stroke-width="1.4" marker-end="url(#a5)"></line>
+        <polyline points="240,125 240,202 280,202" fill="none" stroke="currentColor" stroke-width="1.4" marker-end="url(#a5)"></polyline>
+
+        <rect x="280" y="20" width="300" height="56" rx="5" fill="#0e6a75" fill-opacity=".08" stroke="#0e6a75" stroke-width="1.4"></rect>
+        <text x="294" y="42" font-size="11.5" font-weight="500" fill="currentColor">1 · handshake real</text>
+        <text x="294" y="62" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".72">run_mcp.bat → initialize · limite 7 s</text>
+
+        <rect x="280" y="97" width="300" height="56" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="294" y="119" font-size="11.5" font-weight="500" fill="currentColor">2 · modelo no cache do Hugging Face</text>
+        <text x="294" y="139" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".72">existência dos pesos, sem carregar</text>
+
+        <rect x="280" y="174" width="300" height="56" rx="5" fill="currentColor" fill-opacity=".04" stroke="currentColor" stroke-width="1"></rect>
+        <text x="294" y="196" font-size="11.5" font-weight="500" fill="currentColor">3 · banco</text>
+        <text x="294" y="216" font-family="IBM Plex Mono, monospace" font-size="10" fill="currentColor" opacity=".72">leitura · registros do projeto e total</text>
+
+        <polyline points="580,48 620,48 620,125" fill="none" stroke="currentColor" stroke-width="1.4"></polyline>
+        <line x1="580" y1="125" x2="660" y2="125" stroke="currentColor" stroke-width="1.4" marker-end="url(#a5)"></line>
+        <polyline points="580,202 620,202 620,125" fill="none" stroke="currentColor" stroke-width="1.4"></polyline>
+
+        <rect x="660" y="80" width="200" height="90" rx="5" fill="#2c6b4d" fill-opacity=".08" stroke="#2c6b4d" stroke-width="1.3"></rect>
+        <text x="674" y="104" font-size="11.5" font-weight="500" fill="currentColor">mensagem da sessão</text>
+        <text x="674" y="124" font-size="10.5" fill="currentColor" opacity=".72">✓ / ✗ por checagem</text>
+        <text x="674" y="141" font-size="10.5" fill="currentColor" opacity=".72">motivo real da falha</text>
+        <text x="674" y="158" font-family="IBM Plex Mono, monospace" font-size="10" fill="#2c6b4d">/mcp → Reconnect</text>
+      </svg>
+    </div>
+    <figcaption>
+      <b>A verificação cobre o serviço, não só o arquivo.</b> Depois do handshake o hook encerra a
+      árvore de processos com <code>taskkill /T</code>, para não deixar o Python órfão. O nome do
+      modelo é lido do próprio <code>mcp_server.py</code>, sem duplicação.
+    </figcaption>
+  </figure>
+
+  <div class="note">
+    <span class="lbl">Limite da sonda</span>
+    <p>
+      O hook roda num processo próprio. Ele prova que o servidor consegue subir, mas não que a
+      conexão daquela sessão do Claude Code deu certo, informação que o hook não recebe. Um
+      servidor stdio atende apenas o processo que o iniciou; por isso rodar o <code>.bat</code> à
+      mão serve para ver um erro, mas não conecta o Claude Code.
+    </p>
+  </div>
+
+  <p>
+    O <strong>backup</strong> é uma Scheduled Task horária que copia o banco para
+    <code>~/iCloudDrive/Backups/ml-context</code>, com 3 tentativas e retenção das 20 versões mais
+    recentes. Ele compensa o banco viver fora do git.
+  </p>
+
+  <h3>Diagnóstico rápido</h3>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Sintoma</th><th>Ação</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="role">Ferramentas <code>mcp__ml-context__*</code> ausentes na sessão</td><td class="role"><code>/mcp</code> → <code>ml-context</code> → Reconnect.</td></tr>
+        <tr><td class="role">Hook marca ✗ no handshake</td><td class="role">Rodar <code>run_mcp.bat</code> num terminal para ver o traceback, corrigir e reconectar.</td></tr>
+        <tr><td class="role">Hook marca ✗ no modelo</td><td class="role">Baixar o modelo para o cache do Hugging Face. Se o antivírus interceptar HTTPS, apontar <code>SSL_CERT_FILE</code> para um bundle com os certificados raiz do Windows, só durante o download.</td></tr>
+        <tr><td class="role">Busca devolve resultados sem relação com a pergunta</td><td class="role">O servidor em execução pode estar com outro modelo carregado. Reconectar antes de qualquer gravação.</td></tr>
+        <tr><td class="role">Troca do modelo de embeddings</td><td class="role">Editar <code>EMBEDDING_MODEL</code>, rodar <code>reembed_knowledge.py</code> e reconectar.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Mapa de arquivos</h3>
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Caminho</th><th>Papel</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="path">~/.claude.json</td><td class="role">Registro do servidor em escopo de usuário.</td></tr>
+        <tr><td class="path">~/.claude/settings.json</td><td class="role">Hook <code>SessionStart</code> e <code>MCP_TIMEOUT=90000</code> no bloco <code>env</code>.</td></tr>
+        <tr><td class="path">tools/mcp-server/run_mcp.bat</td><td class="role">Launcher. Exporta as variáveis de modo offline e limpa as de SSL antes do Python subir.</td></tr>
+        <tr><td class="path">tools/mcp-server/mcp_server.py</td><td class="role">O servidor: 5 handlers, schema, busca vetorial e arranque em segundo plano.</td></tr>
+        <tr><td class="path">tools/mcp-server/reembed_knowledge.py</td><td class="role">Recalcula todos os vetores com o modelo configurado, com backup automático.</td></tr>
+        <tr><td class="path">tools/mcp-server/migrate_vec_schema.py</td><td class="role">Migração one-shot da tabela vetorial para cosseno com partition key.</td></tr>
+        <tr><td class="path">tools/mcp-server/backup_ml_context.ps1</td><td class="role">Backup horário para o iCloud.</td></tr>
+        <tr><td class="path">tools/mcp_check.py</td><td class="role">Sonda de saúde do hook.</td></tr>
+        <tr><td class="path">~/.ml-context/knowledge.db</td><td class="role">O banco, fora de qualquer repositório.</td></tr>
+        <tr><td class="path">~/.cache/huggingface/hub</td><td class="role">Cache do modelo de embeddings (~470 MB), lido em modo offline.</td></tr>
+        <tr><td class="path">&lt;projeto&gt;/.claude/agents/</td><td class="role">Definições dos agentes.</td></tr>
+        <tr><td class="path">&lt;projeto&gt;/.claude/skills/</td><td class="role">Comandos reutilizáveis do projeto.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Dependências</h3>
+  <ul class="plain">
+    <li><code>mcp 1.27.1</code> sobre <code>anyio 4.13.0</code> — SDK do protocolo e o transporte usado no <code>detach_stdin()</code></li>
+    <li><code>sqlite-vec 0.1.9</code> — extensão de busca vetorial</li>
+    <li><code>sentence-transformers 5.5.0</code> sobre <code>torch 2.12.0</code> — embeddings em CPU</li>
+  </ul>
+</section>
+
+<footer class="page">
+  Windows 11 · Python 3.14 · Claude Code com servidor MCP local ml-context
+</footer>
+
+</div>
+</body>
+</html>
