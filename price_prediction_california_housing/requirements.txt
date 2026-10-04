@@ -23,8 +23,9 @@ statsmodels==0.14.4  # análise de resíduos LOWESS
 # Downgrade para 1.6.x causa predições incorretas ao carregar o pipeline serializado.
 scikit-learn==1.7.2
 
-# ATENÇÃO: xgboost — versão do treino não registrada no metadata.
-# 2.1.4 é a versão disponível no ambiente original; usar essa como referência.
+# CRÍTICO: manter xgboost==2.1.4 — versão usada no treino, registrada em
+# artifacts/competition_metadata.json (xgboost_version).
+# Outra versão corrompe silenciosamente as predições do pipeline serializado.
 xgboost==2.1.4
 
 lightgbm==4.6.0
