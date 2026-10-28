@@ -26,8 +26,12 @@ def main() -> int:
 
     sys.stderr.reconfigure(encoding="utf-8")  # Windows console default is cp1252.
     print(
-        "Bloqueado: no projeto, só os subagentes gravam conhecimento novo no MCP "
-        "(save_knowledge). Delegue a gravação ao agente responsável pela decisão.",
+        "Bloqueado: só subagentes gravam conhecimento novo no MCP (save_knowledge), "
+        "mesmo quando o dono pede. Delegue com a ferramenta Agent ao subagente "
+        "responsável pelo assunto, passando o conteúdo exato a gravar "
+        "(project, category, crisp_phase). Sem agente óbvio: decisão -> "
+        "arquiteto_solucoes; código -> tech_lead; dados -> engenheiro_dados; "
+        "modelo -> cientista_senior; infra/inferência -> engenheiro_mlops.",
         file=sys.stderr,
     )
     return 2
