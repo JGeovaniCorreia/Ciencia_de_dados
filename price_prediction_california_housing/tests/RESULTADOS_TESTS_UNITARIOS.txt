@@ -1,20 +1,20 @@
 ==============================================================
   RESULTADOS — TESTES UNITÁRIOS
   California Housing · src/predict.py
-  Executado em: 2026-10-28 00:23:08
+  Executado em: 2026-10-28 01:45:17
 ==============================================================
 
   Total: 10   Passaram: 10   Falharam: 0
 
 --------------------------------------------------------------
-  [OK  ]  test_prever_dict_en                            0.501s
-  [OK  ]  test_prever_list_of_dicts                      0.051s
-  [OK  ]  test_prever_dataframe_pt                       0.044s
-  [OK  ]  test_alerta_teto_ativado                       0.054s
-  [OK  ]  test_alerta_teto_desativado                    0.052s
-  [OK  ]  test_intervalo_contem_ponto                    0.058s
-  [OK  ]  test_intervalo_lower_nao_negativo              0.003s
-  [OK  ]  test_colunas_faltando_raises                   0.002s
+  [OK  ]  test_prever_dict_en                            0.558s
+  [OK  ]  test_prever_list_of_dicts                      0.015s
+  [OK  ]  test_prever_dataframe_pt                       0.011s
+  [OK  ]  test_alerta_teto_ativado                       0.010s
+  [OK  ]  test_alerta_teto_desativado                    0.013s
+  [OK  ]  test_intervalo_contem_ponto                    0.010s
+  [OK  ]  test_intervalo_lower_nao_negativo              0.002s
+  [OK  ]  test_colunas_faltando_raises                   0.001s
   [OK  ]  test_tipo_invalido_raises                      0.000s
   [OK  ]  test_nivel_confianca_invalido                  0.001s
 --------------------------------------------------------------

@@ -1,9 +1,8 @@
 """Pytest configuration for the California Housing project.
 
-The XGBoost pipeline was serialized from a notebook where the transformer
-classes lived in __main__. Under pytest, __main__ is pytest.__main__, so
-joblib.load fails to reconstruct them. This conftest patches __main__ with
-the classes from src.transformers before any test runs.
+Puts the project root on sys.path so tests can import src.*. The pipeline
+artifact references its transformer classes in src.transformers, so no
+__main__ patching is needed to load it.
 
 At the end of each session, writes RESULTADOS_TESTS_UNITARIOS.txt inside
 this directory, overwriting any previous run.
@@ -16,11 +15,6 @@ from pathlib import Path
 _ROOT = Path(__file__).parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
-
-from src.transformers import WinsorizacaoTransformer, CaliforniaHousingTransformer  # noqa: E402
-
-sys.modules["__main__"].WinsorizacaoTransformer = WinsorizacaoTransformer
-sys.modules["__main__"].CaliforniaHousingTransformer = CaliforniaHousingTransformer
 
 _results: list[dict] = []
 
