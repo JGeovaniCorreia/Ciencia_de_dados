@@ -84,9 +84,10 @@ winsorização e o `log1p`. O modelo final recebe 13 features: as 8 originais
 - São euclidianas **em graus de lat/lon**, não geodésicas (km). Como a Califórnia ocupa
   uma faixa estreita de latitudes, a distorção é pequena e suficiente para o modelo capturar
   o padrão espacial — e evita dependência de bibliotecas geográficas em produção.
-- As três distâncias são colineares entre si e com `Latitude`/`Longitude`. Isso é aceitável
-  para XGBoost (robusto a colinearidade) mas foi apontado como gap pelo Chief Data
-  Scientist: um *ablation study* ainda não foi feito.
+- As três distâncias são colineares entre si e com `Latitude`/`Longitude`. O *ablation study*
+  (`reports/ablation_dist_features.py`) mostrou que mesmo assim acrescentam sinal: sem elas o
+  RMSE de teste piora 7.2% (IC 95% fora de zero). A colinearidade afeta a leitura do SHAP, que
+  divide o crédito da localização entre as cinco features geográficas — ver README.
 
 **Ordem final das colunas que chegam ao modelo** (`CaliforniaHousingTransformer.OUTPUT_COLS`):
 

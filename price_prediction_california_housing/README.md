@@ -56,6 +56,30 @@ Top features por importância média absoluta (SHAP TreeExplainer):
 
 "Localização, localização, localização" — confirmado estatisticamente.
 
+**Leitura por grupo.** As cinco features geográficas (`Latitude`, `Longitude`, `dist_sf`,
+`dist_la`, `dist_sd`) são colineares e o SHAP divide o crédito entre elas. Somadas, respondem
+por ~56% do |SHAP| médio — cerca de 3× a `RendaMediana` (~18%). Por feature isolada a renda
+lidera; como grupo, a localização domina.
+
+### Ablation das distâncias geográficas
+
+As `dist_*` são funções determinísticas de Latitude/Longitude, então foi testado se acrescentam
+sinal ou só redistribuem importância. O XGBoost aprovado foi re-treinado com os mesmos
+hiperparâmetros e o mesmo split, em 4 variantes × 5 seeds, com IC 95% por bootstrap pareado
+(`reports/ablation_dist_features.py`):
+
+| Variante | Features | RMSE ($100k) | Δ RMSE vs completo [IC 95%] | R² |
+|---|---|---|---|---|
+| Completo (modelo aprovado) | 13 | 0.434 | — | 0.873 |
+| Sem `dist_*` | 10 | 0.465 | +0.031 [+0.026, +0.036] (+7.2%) | 0.854 |
+| Sem Latitude/Longitude | 11 | 0.494 | +0.060 [+0.052, +0.067] (+13.8%) | 0.835 |
+| Sem nenhuma feature geográfica | 8 | 0.658 | +0.224 [+0.210, +0.238] (+51.5%) | 0.672 |
+
+As distâncias **não são redundantes**: removê-las piora o RMSE em ~$3.1k, fora da margem de
+ruído. Árvores fazem cortes alinhados aos eixos e precisariam de muitos splits em lat/lon para
+aproximar uma distância radial até um polo; as `dist_*` entregam essa forma pronta. As
+coordenadas cruas também carregam sinal próprio. O modelo aprovado é mantido como está.
+
 ---
 
 ## Dicionário de variáveis
@@ -134,6 +158,7 @@ predições erradas silenciosamente (ver histórico de decisões).
 │   ├── shap_analysis.py                   # Gera plots SHAP
 │   ├── fairness_geo.py                    # Gera análise de fairness geográfica
 │   ├── residuals.py                       # Gera análise de resíduos
+│   ├── ablation_dist_features.py          # Ablation das features de distância (+ .csv/.txt/_shap.png)
 │   ├── shap_summary_plot.png
 │   ├── shap_bar_plot.png
 │   ├── fairness_geo.csv
@@ -143,8 +168,8 @@ predições erradas silenciosamente (ver histórico de decisões).
 │   ├── predict.py                         # Inferência em produção (com IC conformal)
 │   └── transformers.py                    # Transformadores customizados do pipeline
 ├── tests/
-│   ├── test_predict.py                    # 9 testes unitários para src/predict.py
-│   └── conftest.py                        # Fixtures (patch de joblib.load)
+│   ├── test_predict.py                    # 10 testes unitários para src/predict.py
+│   └── conftest.py                        # sys.path do projeto e relatório dos testes
 ├── california_housing_optuna.db           # Banco de trials Optuna (não deletar)
 ├── mlflow.db                              # Registro de experimentos MLflow
 └── requirements.txt
@@ -171,6 +196,9 @@ jupyter nbconvert --to notebook --execute notebooks/model_competition.ipynb
 
 # Análise de resíduos
 .venv\Scripts\python reports\residuals.py
+
+# Ablation das features de distância geográfica (re-treina 4 variantes × 5 seeds)
+.venv\Scripts\python reports\ablation_dist_features.py
 
 # Teste de inferência
 .venv\Scripts\python src\predict.py

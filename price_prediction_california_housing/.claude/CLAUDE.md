@@ -135,6 +135,8 @@ e deve ser visível para qualquer pessoa que visitar o repositório.
 | 2026-05-24 | Gap RMSE Sul Costa confirmado como falha de dataset, não de modelo | Sul Costa tem 15.7% de truncamento (3.3× média global) e apenas 483 amostras (2.3%) — dupla causa estrutural; `reports/truncation_analysis.py` reproduz a análise | avaliacao |
 | 2026-08-05 | `mlflow.db` e `california_housing_optuna.db` versionados no git | Projeto de portfólio: clonar o repo deve reproduzir o histórico completo de experimentos MLflow e trials Optuna, sem exigir re-treino do zero | mlops |
 | 2026-09-11 | Ciclo CRISP-DM formalmente encerrado — veredicto Aprovado | Segunda passada do CDS confirmou as 5 ressalvas de 2026-05-24 resolvidas pelo backlog de 2026-05-28; deploy fica pendente de avaliação própria do dono do projeto | chief_data_scientist |
+| 2026-10-28 | Features `dist_sf/dist_la/dist_sd` mantidas | Ablation (4 variantes × 5 seeds, IC bootstrap): sem elas o RMSE piora 7.2%, fora do ruído — não são redundantes apesar de colineares com Lat/Long; SHAP deve ser lido por grupo (geo ≈ 56%) | modelagem |
+| 2026-10-28 | Pipeline salvo com classes de `src.transformers` e `device=cpu` | Pickle com classes em `__main__` quebrava `from src.predict import prever`; treino segue em GPU, `device` trocado antes do `joblib.dump` | mlops |
 
 ---
 

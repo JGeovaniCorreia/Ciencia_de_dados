@@ -1,0 +1,15 @@
+Ablation B04 — features de distância geográfica (dist_sf, dist_la, dist_sd)
+Gerado em 2026-10-28 01:50 | treino: cuda | seeds: [42, 43, 44, 45, 46] | bootstrap: 2000 | test set: 4128 linhas
+
+Métricas no test set (média ± desvio entre seeds; R² em log1p, RMSE/MAE em $100k):
+  a_completo     n=13  R²=0.8728±0.0015  RMSE=0.4340±0.0024  MAE=0.2709  MAPE=14.79%  SHAP geo=55.8%
+  b_sem_dist     n=10  R²=0.8537±0.0033  RMSE=0.4653±0.0054  MAE=0.2957  MAPE=16.25%  SHAP geo=40.8%
+  c1_sem_latlon  n=11  R²=0.8348±0.0018  RMSE=0.4942±0.0022  MAE=0.3166  MAPE=17.33%  SHAP geo=43.1%
+  c2_sem_geo     n= 8  R²=0.6718±0.0025  RMSE=0.6578±0.0028  MAE=0.4662  MAPE=27.41%  SHAP geo=0.0%
+
+Δ vs a_completo (predições médias entre seeds; IC 95% bootstrap pareado):
+  b_sem_dist     ΔRMSE=+0.0310 [+0.0260, +0.0361] (+7.2%)  ΔR²=-0.0186 [-0.0216, -0.0158]  → EFEITO RELEVANTE
+  c1_sem_latlon  ΔRMSE=+0.0599 [+0.0524, +0.0672] (+13.8%)  ΔR²=-0.0374 [-0.0428, -0.0325]  → EFEITO RELEVANTE
+  c2_sem_geo     ΔRMSE=+0.2237 [+0.2096, +0.2377] (+51.5%)  ΔR²=-0.1995 [-0.2132, -0.1856]  → EFEITO RELEVANTE
+
+Critério: efeito relevante se o IC 95% de ΔRMSE exclui zero E |ΔRMSE| >= 1% do RMSE de a_completo (0.4340).
