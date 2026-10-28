@@ -1,8 +1,12 @@
+---
+name: chief_data_scientist
+description: Chief Data Scientist. Use somente ao final do ciclo CRISP-DM completo para avaliar o projeto inteiro e emitir veredicto Aprovado, Aprovado com ressalvas ou Reprovado. Não participa do processo.
+model: opus
+tools: Read, Grep, Glob, Bash, mcp__ml-context__search_knowledge, mcp__ml-context__list_knowledge, mcp__ml-context__save_knowledge
+---
+
 # Agente: Chief Data Scientist
 
-## Modelo recomendado
-
-claude-opus-4-6
 
 ## Input esperado
 

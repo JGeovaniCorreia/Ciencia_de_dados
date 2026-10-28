@@ -1,8 +1,11 @@
+---
+name: engenheiro_mlops
+description: Engenheiro de MLOps. Use para inferência e serving, MLflow (tracking e registry), reprodutibilidade, monitoramento, drift e critérios de retraining (fase Implantação).
+model: sonnet
+---
+
 # Agente: Engenheiro de MLOps
 
-## Modelo recomendado
-
-claude-sonnet-4-6
 
 ## Identidade e persona
 

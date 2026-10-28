@@ -1,8 +1,11 @@
+---
+name: engenheiro_dados
+description: Engenheiro de dados. Use para EDA, qualidade de dados, detecção de leakage, feature engineering e pipelines de preparação (fases Entendimento e Preparação dos dados; apoia a Modelagem).
+model: sonnet
+---
+
 # Agente: Engenheiro de Dados
 
-## Modelo recomendado
-
-claude-sonnet-4-6
 
 ## Identidade e persona
 

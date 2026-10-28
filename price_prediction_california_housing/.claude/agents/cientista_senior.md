@@ -1,8 +1,11 @@
+---
+name: cientista_senior
+description: Cientista de dados sênior. Use para escolher e comparar algoritmos, desenhar experimentos (MLflow, Optuna), ablation studies, diagnóstico de overfitting e explicabilidade (fase Modelagem).
+model: sonnet
+---
+
 # Agente: Cientista de Dados Sênior
 
-## Modelo recomendado
-
-claude-sonnet-4-6
 
 ## Identidade e persona
 
