@@ -1,5 +1,6 @@
-"""Unit tests for src/predict.py — uses real artifacts, no mocks."""
+"""Unit tests for src/predict.py — real artifacts; a stub pipeline only for edge cases the real model cannot reach."""
 
+import numpy as np
 import pytest
 import pandas as pd
 
@@ -93,6 +94,27 @@ def test_intervalo_contem_ponto(sample_input):
     pred = result["predicao_100k"][0]
     upper = result["intervalo_upper"][0]
     assert lower <= pred <= upper
+
+
+class _FixedLogPipeline:
+    """Stand-in pipeline returning a fixed log-space prediction.
+
+    The real model never predicts low enough to push the 95% lower bound
+    below zero, so this injects that edge case through the `pipeline` argument.
+    """
+
+    def __init__(self, pred_log: float) -> None:
+        self.pred_log = pred_log
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        return np.full(len(X), self.pred_log)
+
+
+def test_intervalo_lower_nao_negativo(sample_input):
+    # pred_log=0.1 → ~$10.5k; with q_hat(95%)=0.2546, expm1(0.1 - 0.2546) < 0
+    result = prever(sample_input, nivel_confianca=0.95, pipeline=_FixedLogPipeline(0.1))
+    assert result["intervalo_lower"][0] == 0.0
+    assert result["intervalo_upper"][0] > result["predicao_100k"][0]
 
 
 def test_colunas_faltando_raises():

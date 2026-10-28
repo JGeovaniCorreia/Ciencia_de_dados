@@ -120,7 +120,7 @@ Retorno de `prever()` — dicionário com arrays alinhados às linhas da entrada
 |---|---|---|---|
 | `predicao_100k` | `np.ndarray` | $100.000 USD | Predição pontual na escala original do dataset |
 | `predicao_usd` | `np.ndarray` | USD | Predição pontual em dólares (`predicao_100k × 100.000`) |
-| `intervalo_lower` | `np.ndarray` | $100.000 USD | Limite inferior do intervalo conformal (`expm1(pred_log − q_hat)`) |
+| `intervalo_lower` | `np.ndarray` | $100.000 USD | Limite inferior do intervalo conformal (`max(expm1(pred_log − q_hat), 0)` — cortado em zero, pois valor de imóvel negativo não tem sentido) |
 | `intervalo_upper` | `np.ndarray` | $100.000 USD | Limite superior do intervalo conformal |
 | `alerta_teto` | `list[bool]` | — | `True` se predição ≥ $450k — zona de risco do truncamento |
 | `mensagem_alerta` | `list[str]` | — | Texto do alerta de teto (string vazia se OK) |

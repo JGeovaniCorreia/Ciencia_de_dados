@@ -124,7 +124,9 @@ def prever(
     pred_100k = np.expm1(pred_log)
     pred_usd = pred_100k * 100_000
 
-    lower = np.expm1(pred_log - q_hat)
+    # Clip at zero: expm1 goes negative when pred_log < q_hat, and a negative
+    # house value is meaningless (reachable at 95% for predictions below ~$29k).
+    lower = np.maximum(np.expm1(pred_log - q_hat), 0.0)
     upper = np.expm1(pred_log + q_hat)
 
     alertas = pred_100k >= TETO_ALERTA_100K
