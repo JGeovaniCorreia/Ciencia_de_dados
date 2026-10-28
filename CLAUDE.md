@@ -1,6 +1,6 @@
 # Contexto Data Science — compartilhado entre projetos
 
-Aplicado em todos os subprojetos dentro de Ciencia_de_dados-1\.
+Aplicado em todos os subprojetos dentro de Ciencia_de_dados\.
 Geovani é cientista de dados focado em ML e IA generativa.
 
 ---
@@ -21,7 +21,7 @@ Geovani é cientista de dados focado em ML e IA generativa.
 ## Stack padrão
 
 ### Linguagem
-- Python 3.11+
+- Python 3.10+ — cada projeto fixa a sua versão no próprio .venv e requirements.txt
 
 ### ML supervisionado
 - **Regressão**: LinearRegression, Ridge, Lasso, ElasticNet (scikit-learn)
@@ -63,7 +63,9 @@ Geovani é cientista de dados focado em ML e IA generativa.
 
 - Framework de processo: CRISP-DM (sempre seguir as fases)
 - Tracking de experimentos: MLflow em todo treino
-- Estrutura obrigatória de pastas: data/ models/ src/ configs/ notebooks/ reports/
+- Estrutura padrão de pastas: data/ models/ src/ configs/ notebooks/ reports/
+  — pastas sem uso no projeto podem ser omitidas (ex.: data/ quando o dataset vem
+  de biblioteca); o california_housing guarda os artefatos de modelo em artifacts/
 - Notebooks: apenas para exploração, nunca para código de produção
 - Todo código de treino deve ser reproduzível (seed fixo, logging de params)
 
@@ -84,8 +86,9 @@ Geovani é cientista de dados focado em ML e IA generativa.
 
 ### Otimização de hiperparâmetros
 - Sempre usar Optuna para busca de hiperparâmetros
-- Persistir trials em banco SQLite separado do MCP:
-  study = optuna.create_study(storage="sqlite:///configs/optuna_trials.db")
+- Persistir trials em um banco SQLite por projeto, separado do MCP e versionado
+  no git (ex.: california_housing_optuna.db na raiz do projeto):
+  study = optuna.create_study(storage="sqlite:///<projeto>_optuna.db")
 - Nunca deletar o banco de trials — permite retomar de onde parou
 - Nomear estudos com versão: "modelo_v1", "modelo_v2"
 
@@ -110,7 +113,11 @@ Geovani é cientista de dados focado em ML e IA generativa.
 
 ## Agentes disponíveis
 
-Este projeto usa um sistema de agentes especializados em .claude/agents/:
+Cada projeto tem seus agentes como subagentes do Claude Code em
+`<projeto>/.claude/agents/` (o modelo é o price_prediction_california_housing).
+Eles só são carregados quando a sessão é aberta na pasta do projeto.
+Subagentes não acionam outros subagentes: o coordenador_projeto devolve um plano
+de acionamento e a sessão principal executa.
 
 | Agente | Papel | Quando atua |
 |--------|-------|-------------|

@@ -52,7 +52,7 @@ Modelagem.
 - Usa seed fixo e documenta para reprodutibilidade
 - Sempre verifica se GPU está disponível antes de treinar:
   device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-- Para Optuna: sempre persiste trials em configs/optuna_trials.db e nomeia estudos com versão
+- Para Optuna: sempre persiste trials no banco SQLite do projeto (california_housing_optuna.db) e nomeia estudos com versão
 - Se identificar dúvidas sobre estrutura, modularidade ou qualidade do código durante seu trabalho, sinalize ao Coordenador de Projeto para acionar o Tech Lead
 
 ## Protocolo de experimento

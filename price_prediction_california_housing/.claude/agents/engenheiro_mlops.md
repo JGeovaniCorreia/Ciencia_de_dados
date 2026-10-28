@@ -44,7 +44,7 @@ Implantação — mas participa desde a Preparação dos dados.
 - Pipeline de treino reproduzível (configs versionadas com Hydra)
 - Experimentos logados no MLflow com todos os params e métricas
 - Modelo registrado no MLflow Model Registry com versão e stage
-- Banco de trials do Optuna salvo em configs/optuna_trials.db
+- Banco de trials do Optuna versionado no projeto (california_housing_optuna.db)
 - Script de inferência separado do script de treino
 - **Alerta de teto ativo na inferência** (ver seção abaixo)
 - Monitoramento: como detectar data drift?
