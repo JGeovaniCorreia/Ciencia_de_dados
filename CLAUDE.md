@@ -139,7 +139,11 @@ Veredicto em três saídas: Aprovado, Aprovado com ressalvas ou Reprovado.
 
 ## Memória e contexto
 
-- Ao tomar decisões importantes, salve no banco com save_knowledge
+- Só os subagentes gravam conhecimento novo (save_knowledge), ao tomar decisões
+  importantes ou ao finalizar uma fase CRISP-DM. A sessão principal não grava:
+  delega a gravação ao agente responsável. Um hook PreToolUse do projeto
+  (`.claude/hooks/guard_mcp_save.py`) bloqueia save_knowledge fora de subagente
+- Atualizar ou apagar registros existentes (update/delete_knowledge, ex.: backlog)
+  só com pedido explícito do dono
 - Ao iniciar uma tarefa nova, consulte o banco com search_knowledge
-- Ao finalizar uma fase CRISP-DM, registre os aprendizados
 - Banco de trials do Optuna (optuna_trials.db) é separado do banco MCP

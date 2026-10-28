@@ -1,1 +1,16 @@
-{}
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__ml-context__save_knowledge",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_mcp_save.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
