@@ -57,32 +57,18 @@ Decisão apoiada: precificação de imóveis em propostas e avaliações de merc
 - [x] 5. Avaliação
 - [x] 6. Implantação
 
-**Fase ativa**: concluído — ciclo CRISP-DM encerrado. Veredicto final do Chief Data
-Scientist: **APROVADO** (2026-09-11). Deploy real ainda não realizado — aguardando
-revisão do dono do projeto para definir o momento.
+**Fase ativa**: concluído — ciclo CRISP-DM encerrado com veredicto **Aprovado** do
+Chief Data Scientist. Deploy real ainda não realizado — o momento é decisão do dono
+do projeto. Pendências pós-aprovação ficam no backlog do banco MCP.
 
-**Nota (2026-05-18):** Fases 2–4 concluídas no `model_competition.ipynb`.
-XGBoost venceu a competição de 5 modelos (R²=0.87, RMSE=0.433, MAE=0.270).
-
-**Nota (2026-05-20):** Fases 5–6 concluídas.
-- SHAP values: RendaMediana é o driver principal, seguido de Latitude/Longitude.
-- Fairness: gap de RMSE $22.6k entre Sul Costa e Norte Interior — alerta ativo.
-- MLflow: experimento registrado em `mlflow.db`, modelo `california-housing-xgboost` v1.
-- Inferência: `src/predict.py` com IC conformal 80% e alerta de teto ($450k).
-- Artefato XGBoost regenerado (incompatibilidade joblib entre versões detectada e corrigida).
-
-**Nota (2026-05-24):** Chief Data Scientist avalia o ciclo: **Aprovado com ressalvas**
-(5 pendências — README, diagnóstico Sul Costa, código duplicado, artefato de resíduos,
-EDA formal).
-
-**Nota (2026-05-28):** Backlog de 16 itens (revisão CRISP-DM de 2026-05-25) aplicado
-por completo, cobrindo as 5 ressalvas do CDS.
-
-**Nota (2026-09-11):** Segunda passada do Chief Data Scientist confirma as 5 ressalvas
-resolvidas (evidência verificada arquivo a arquivo) → veredicto **Aprovado**. Restam
-2 gaps cosméticos não-bloqueantes: comentário obsoleto em `requirements.txt` e ausência
-de ablation study para colinearidade das features de distância geográfica. Detalhe
-completo no banco MCP.
+**Estado atual:**
+- Modelo: XGBoost, vencedor da competição de 5 modelos em `notebooks/model_competition.ipynb`
+  (hold-out: R²=0.87, RMSE=0.433, MAE=0.270).
+- Explicabilidade: SHAP — RendaMediana é o driver principal, seguido de Latitude/Longitude.
+- Fairness: Sul Costa e Norte Interior abaixo das metas por limitação estrutural do
+  dataset (truncamento e sub-representação) — documentado no README.
+- MLflow: `mlflow.db`, modelo registrado `california-housing-xgboost` v1.
+- Inferência: `src/predict.py` com IC conformal e alerta de teto ($450k).
 
 ---
 
