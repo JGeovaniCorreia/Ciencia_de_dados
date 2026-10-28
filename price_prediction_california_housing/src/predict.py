@@ -11,10 +11,10 @@ Single prediction from a dict:
 Batch prediction from a DataFrame (original sklearn column names):
     result = prever(X_df)
 
-Returns a dict with keys:
+Returns a dict with keys (full description in prever()):
     predicao_100k   — predicted median house value in $100k units
     predicao_usd    — same in dollars
-    intervalo_80pct — list of (lower, upper) tuples in $100k (conformal, 80%)
+    intervalo_lower / intervalo_upper — conformal interval bounds in $100k
     alerta_teto     — True if prediction is in the $450k+ risk zone
 """
 
