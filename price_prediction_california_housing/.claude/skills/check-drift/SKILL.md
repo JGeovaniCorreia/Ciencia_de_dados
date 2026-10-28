@@ -1,5 +1,6 @@
 ---
-description: Detect distribution drift between two datasets using PSI (Population Stability Index) and summary statistics. Used by the data-engineer agent to decide whether retraining or recalibration is needed.
+name: check-drift
+description: Detect distribution drift between two datasets using PSI (Population Stability Index) and summary statistics. Used by the engenheiro_dados agent to decide whether retraining or recalibration is needed.
 ---
 
 ## Usage
@@ -13,7 +14,7 @@ If only one path is given, compare it against the California Housing training di
 
 ## Execution
 
-Run with `.venv\Scripts\python`. The rename mapping below matches the canonical schema in **CLAUDE.md > Data Schema** — update both if column names ever change.
+Run with `.venv\Scripts\python`. The rename mapping below matches the canonical schema in `docs/data_dictionary.md` — update both if column names ever change.
 
 ```python
 import sys
@@ -103,10 +104,10 @@ Based on which features drifted:
 
 - Only `Populacao` or `IdadeMediaResidencias` drifted → 🟡 Monitor; model likely still valid
 - `RendaMediana` or geographic features drifted → ⚠️ Recalibrate Conformal q_hats with new calibration set
-- More than 3 features with PSI > 0.20 → 🔴 Full retraining recommended (run `/run-phase1`)
+- More than 3 features with PSI > 0.20 → 🔴 Full retraining recommended (`notebooks/model_competition.ipynb`)
 - Target column drifted → 🔴 Data pipeline issue — investigate source before retraining
 
 **5. Next steps checklist** (only for detected drift)
 - [ ] Investigate source of distribution change (seasonal? data quality? scope change?)
 - [ ] Recollect calibration set from new distribution if only recalibrating q_hats
-- [ ] If retraining: delete `california_housing_optuna.db` or use a new study name for fresh tuning
+- [ ] If retraining: use a new versioned Optuna study name — never delete `california_housing_optuna.db`

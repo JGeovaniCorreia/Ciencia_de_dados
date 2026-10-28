@@ -1,4 +1,5 @@
 ---
+name: optuna-status
 description: Query california_housing_optuna.db and show a summary of all Optuna studies — trial counts, best values, best hyperparams, and whether more trials are worth running.
 ---
 
@@ -35,9 +36,9 @@ After running, display the output formatted as a markdown table with columns:
 `Study | Completed | Pruned | Failed | Best CV R² | Best params (top 3)`
 
 Then print a management tip:
-> To reset a study: `optuna.delete_study(study_name="...", storage="sqlite:///california_housing_optuna.db")`
-> To start fresh: delete `california_housing_optuna.db` (loses all trial history)
-> For convergence analysis and tuning recommendations, use the `hyperopt-advisor` agent.
+> Never delete `california_housing_optuna.db` or its studies — it is the versioned trial history.
+> For a new search, create a new versioned study name instead of reusing an existing one.
+> For convergence analysis and tuning recommendations, use the `cientista_senior` agent.
 
 If the database file does not exist, print:
-> No Optuna database found. Run Phase 1 first (`/run-phase1`).
+> No Optuna database found. Run `notebooks/model_competition.ipynb` first.

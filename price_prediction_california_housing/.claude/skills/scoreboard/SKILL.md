@@ -1,4 +1,5 @@
 ---
+name: scoreboard
 description: Display Phase 1 model competition results from artifacts/competition_metadata.json — scoreboard, winner, metrics, conformal q_hats, and training config.
 ---
 
@@ -29,4 +30,4 @@ Also print `best_cv_r2`.
 Print: n_train_samples, n_cal_samples, n_test_samples, split ratio (compute from n values), sklearn/optuna/python versions.
 
 If `artifacts/competition_metadata.json` does not exist, print:
-> Phase 1 has not been run yet. Execute `/run-phase1` first.
+> Phase 1 has not been run yet. Run `notebooks/model_competition.ipynb` first.

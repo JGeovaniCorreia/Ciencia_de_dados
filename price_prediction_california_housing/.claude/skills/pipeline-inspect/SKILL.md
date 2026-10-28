@@ -1,13 +1,13 @@
 ---
-description: Load a saved .joblib pipeline and display its stages, parameters, and a data-flow diagram. Accepts an optional path argument; defaults to artifacts/competition_winner_catboost.joblib.
+name: pipeline-inspect
+description: Load a saved .joblib pipeline and display its stages, parameters, and a data-flow diagram. Accepts an optional path argument; defaults to the competition winner recorded in artifacts/competition_metadata.json.
 ---
 
 ## Usage
 
 `/pipeline-inspect [path/to/pipeline.joblib]`
 
-Default path (when no argument given): `artifacts/competition_winner_catboost.joblib`
-Also check `artifacts/california_housing_pipeline.joblib` if it exists.
+Default path (when no argument given): `artifacts/competition_winner_<winner>.joblib`, with `<winner>` read from `artifacts/competition_metadata.json`.
 
 ## Execution
 
@@ -25,7 +25,7 @@ else:
         winner = json.loads(meta.read_text())["competition_winner"].lower()
         path = f"artifacts/competition_winner_{winner}.joblib"
     else:
-        path = "artifacts/competition_winner_catboost.joblib"  # fallback
+        raise SystemExit("artifacts/competition_metadata.json not found — pass the pipeline path")
 
 pipeline = joblib.load(path)
 
@@ -48,6 +48,10 @@ try:
     print(f"  n_features_in_: {estimator.n_features_in_}")
 except AttributeError:
     pass
+try:
+    print(f"  device: {estimator.get_params().get('device')}")
+except Exception:
+    pass
 ```
 
 ## Display
@@ -68,6 +72,7 @@ After running, show:
    - [ ] StandardScaler is second-to-last
    - [ ] Final estimator is a regressor (not a classifier)
    - [ ] Pipeline has been fitted (check `pipeline.steps[-1][1]` has `n_features_in_` or equivalent)
+   - [ ] Estimator `device` is `cpu` or unset — inference must run on CPU (flag `cuda` as a risk)
 
 3. Inference reminder:
    > Input must use Portuguese column names. Predictions are in log-scale — apply `np.expm1()` and multiply by 100_000 for USD.

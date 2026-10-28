@@ -1,5 +1,6 @@
 ---
-description: Generate a data quality profile for an external CSV or Parquet file — missing values, dtypes, distributions, outliers, skewness, and cardinality. Use this when validating NEW or EXTERNAL data before inference (e.g., a file from a client, a new data dump). Do NOT use for the standard California Housing training dataset — use /eda-report for that.
+name: profile-data
+description: Generate a data quality profile for an external CSV or Parquet file — missing values, dtypes, distributions, outliers, skewness, and cardinality. Use this when validating NEW or EXTERNAL data before inference (e.g., a file from a client, a new data dump). Do NOT use for the standard California Housing training dataset — its EDA lives in `notebooks/model_competition.ipynb`.
 ---
 
 ## Usage
@@ -10,7 +11,7 @@ If no path given, profiles the California Housing dataset directly from sklearn.
 
 ## Execution
 
-Run with `.venv\Scripts\python`. The rename mapping below matches the canonical schema in **CLAUDE.md > Data Schema** — update both if column names ever change.
+Run with `.venv\Scripts\python`. The rename mapping below matches the canonical schema in `docs/data_dictionary.md` — update both if column names ever change.
 
 ```python
 import sys, numpy as np, pandas as pd
