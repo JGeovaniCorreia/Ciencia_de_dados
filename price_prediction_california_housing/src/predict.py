@@ -20,6 +20,7 @@ Returns a dict with keys (full description in prever()):
 
 import functools
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -80,13 +81,15 @@ def _load_pipeline() -> Pipeline:
 
 @functools.lru_cache(maxsize=None)
 def _load_q_hat(nivel: float) -> float:
-    with open(_METADATA_PATH) as f:
+    with open(_METADATA_PATH, encoding="utf-8") as f:
         meta = json.load(f)
     q_hats = meta["conformal_q_hats"]
-    key = str(nivel)
-    if key not in q_hats:
-        raise ValueError(f"nivel={nivel} nao disponivel. Opcoes: {list(q_hats.keys())}")
-    return float(q_hats[key])
+    # Match by value, not by str(nivel): a computed level such as 0.7 + 0.1
+    # (0.7999999999999999) must still resolve to the "0.8" key.
+    for key, q_hat in q_hats.items():
+        if math.isclose(float(key), nivel, abs_tol=1e-9):
+            return float(q_hat)
+    raise ValueError(f"nivel={nivel} nao disponivel. Opcoes: {list(q_hats.keys())}")
 
 
 def _normalize_input(X: dict | list[dict] | pd.DataFrame) -> pd.DataFrame:
@@ -121,7 +124,9 @@ def prever(
         X: Input features as dict (single), list-of-dicts, or DataFrame.
            Accepts original sklearn names (MedInc, HouseAge, ...) or
            Portuguese names (RendaMediana, IdadeMediaResidencias, ...).
-        nivel_confianca: Confidence level for the conformal interval (0.8, 0.9, or 0.95).
+        nivel_confianca: Confidence level for the conformal interval. Valid levels
+            are the keys of conformal_q_hats in competition_metadata.json
+            (0.8, 0.9, 0.95), matched by value with a 1e-9 tolerance.
         pipeline: Pre-loaded pipeline or any object implementing Preditor
             (optional — defaults to the cached production pipeline).
 

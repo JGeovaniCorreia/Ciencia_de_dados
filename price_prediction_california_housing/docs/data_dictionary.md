@@ -115,7 +115,8 @@ Criadas apenas nos scripts de `reports/` para avaliação, fairness e diagnósti
 
 ## 5. Saídas da inferência (`src/predict.prever`)
 
-Retorno de `prever()` — dicionário com arrays alinhados às linhas da entrada.
+Retorno de `prever()` — dicionário com arrays alinhados às linhas da entrada. O contrato é
+o `TypedDict` `ResultadoPredicao` em `src/predict.py`.
 
 | Chave | Tipo | Unidade | Descrição |
 |---|---|---|---|
@@ -129,7 +130,9 @@ Retorno de `prever()` — dicionário com arrays alinhados às linhas da entrada
 | `mensagem_alerta_ic` | `list[str]` | — | Texto do alerta de IC (string vazia se OK) |
 
 **Intervalos:** Conformal Prediction (split 60/20/20). O `q_hat` de cada nível de confiança
-fica em `artifacts/competition_metadata.json` (`conformal_q_hats`: 0.80, 0.90, 0.95).
+fica em `artifacts/competition_metadata.json` (`conformal_q_hats`: 0.80, 0.90, 0.95). O
+`nivel_confianca` é comparado por valor (tolerância 1e-9), então um nível calculado como
+`0.7 + 0.1` resolve para 0.80; qualquer outro nível gera `ValueError`.
 Alerta em $450k e não $500k porque o IC 80% (`q_hat = 0.133`) já cruza o teto a partir desse valor.
 
 ---

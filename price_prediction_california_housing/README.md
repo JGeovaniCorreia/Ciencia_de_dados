@@ -170,7 +170,7 @@ predições erradas silenciosamente (ver histórico de decisões).
 │   ├── predict.py                         # Inferência em produção (com IC conformal)
 │   └── transformers.py                    # Transformadores customizados do pipeline
 ├── tests/
-│   ├── test_predict.py                    # 10 testes unitários para src/predict.py
+│   ├── test_predict.py                    # 11 testes unitários para src/predict.py
 │   └── conftest.py                        # sys.path do projeto e relatório dos testes
 ├── california_housing_optuna.db           # Banco de trials Optuna (não deletar)
 ├── mlflow.db                              # Registro de experimentos MLflow

@@ -135,6 +135,14 @@ def test_tipo_invalido_raises():
         prever("isso nao e um input valido")
 
 
+def test_nivel_confianca_float_calculado(sample_input):
+    # 0.7 + 0.1 == 0.7999999999999999 — str() would not match the "0.8" key
+    esperado = prever(sample_input, nivel_confianca=0.8)
+    result = prever(sample_input, nivel_confianca=0.7 + 0.1)
+    np.testing.assert_array_equal(result["intervalo_lower"], esperado["intervalo_lower"])
+    np.testing.assert_array_equal(result["intervalo_upper"], esperado["intervalo_upper"])
+
+
 def test_nivel_confianca_invalido(sample_input):
     with pytest.raises(ValueError):
         prever(sample_input, nivel_confianca=0.75)
