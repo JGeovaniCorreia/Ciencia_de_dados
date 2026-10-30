@@ -1,5 +1,6 @@
-regiao_key,regiao,n,rmse_100k,mae_100k,r2,mape_pct
-norte_interior,Norte Interior,120,0.3674,0.217,0.6939,23.21
-norte_costa,Norte Costa,1945,0.4169,0.2629,0.8767,15.69
-sul_interior,Sul Interior,1952,0.4416,0.2737,0.8323,13.28
-sul_costa,Sul Costa,111,0.5934,0.3812,0.7478,13.23
+regiao_key,regiao,n,rmse_100k,rmse_ic95_lo,rmse_ic95_hi,mae_100k,r2,mape_pct,mape_ic95_lo,mape_ic95_hi
+bay_area,Bay Area,820,0.4485,0.4059,0.4894,0.2998,0.844,12.59,11.49,13.7
+grande_la,Grande LA,1640,0.4539,0.4192,0.4897,0.2815,0.8243,13.21,11.41,15.7
+san_diego,San Diego,307,0.4452,0.3796,0.5121,0.2881,0.8131,13.99,12.53,15.46
+demais_norte,Demais — Norte,938,0.358,0.3189,0.3998,0.2175,0.7803,17.86,16.69,19.17
+demais_sul,Demais — Sul,423,0.4619,0.384,0.5386,0.2691,0.7879,18.1,15.61,21.02

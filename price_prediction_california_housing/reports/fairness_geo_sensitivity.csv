@@ -1,0 +1,6 @@
+metro_km,san_diego_km,gap_rmse_100k,pior_regiao,rmse_pior_100k,n_min,n_demais_sul,rmse_demais_sul_100k,acima_limiar
+60,40,0.1445,Demais — Sul,0.5124,280,596,0.5124,False
+70,45,0.1204,Demais — Sul,0.4799,287,531,0.4799,False
+80,50,0.1039,Demais — Sul,0.4619,307,423,0.4619,False
+90,55,0.1486,Demais — Sul,0.4997,319,325,0.4997,False
+100,60,0.1704,Demais — Sul,0.5104,265,265,0.5104,True
