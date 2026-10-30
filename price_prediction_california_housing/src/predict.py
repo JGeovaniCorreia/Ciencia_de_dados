@@ -23,6 +23,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Protocol, TypedDict
 
 _ROOT = Path(__file__).parent.parent
 if str(_ROOT) not in sys.path:
@@ -32,6 +33,7 @@ from src.transformers import WinsorizacaoTransformer, CaliforniaHousingTransform
 import joblib
 import numpy as np
 import pandas as pd
+from sklearn.pipeline import Pipeline
 
 _ARTIFACTS = _ROOT / "artifacts"
 _METADATA_PATH = _ARTIFACTS / "competition_metadata.json"
@@ -52,8 +54,27 @@ TETO_ALERTA_100K = 4.5
 TETO_MODELO_100K = 5.0
 
 
+class Preditor(Protocol):
+    """Anything with a predict() returning log1p-scale values (the real Pipeline or a test stub)."""
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray: ...
+
+
+class ResultadoPredicao(TypedDict):
+    """Return contract of prever() — arrays/lists aligned to the input rows."""
+
+    predicao_100k: np.ndarray
+    predicao_usd: np.ndarray
+    intervalo_lower: np.ndarray
+    intervalo_upper: np.ndarray
+    alerta_teto: list[bool]
+    mensagem_alerta: list[str]
+    alerta_teto_ic: list[bool]
+    mensagem_alerta_ic: list[str]
+
+
 @functools.lru_cache(maxsize=1)
-def _load_pipeline():
+def _load_pipeline() -> Pipeline:
     return joblib.load(_PIPELINE_PATH)
 
 
@@ -68,7 +89,7 @@ def _load_q_hat(nivel: float) -> float:
     return float(q_hats[key])
 
 
-def _normalize_input(X) -> pd.DataFrame:
+def _normalize_input(X: dict | list[dict] | pd.DataFrame) -> pd.DataFrame:
     """Accept dict, list-of-dicts, or DataFrame; return DataFrame with PT column names."""
     if isinstance(X, dict):
         X = pd.DataFrame([X])
@@ -92,8 +113,8 @@ def _normalize_input(X) -> pd.DataFrame:
 def prever(
     X: dict | list[dict] | pd.DataFrame,
     nivel_confianca: float = 0.8,
-    pipeline=None,
-) -> dict:
+    pipeline: Preditor | None = None,
+) -> ResultadoPredicao:
     """Predict median house value with conformal interval and ceiling alert.
 
     Args:
@@ -101,10 +122,11 @@ def prever(
            Accepts original sklearn names (MedInc, HouseAge, ...) or
            Portuguese names (RendaMediana, IdadeMediaResidencias, ...).
         nivel_confianca: Confidence level for the conformal interval (0.8, 0.9, or 0.95).
-        pipeline: Pre-loaded pipeline (optional — avoids reloading on every call).
+        pipeline: Pre-loaded pipeline or any object implementing Preditor
+            (optional — defaults to the cached production pipeline).
 
     Returns:
-        Dict with keys:
+        ResultadoPredicao (a plain dict at runtime) with keys:
             predicao_100k    (np.ndarray) — predicted value in $100k
             predicao_usd     (np.ndarray) — predicted value in USD
             intervalo_lower  (np.ndarray) — lower bound in $100k
@@ -150,16 +172,16 @@ def prever(
         for a in alertas_ic
     ]
 
-    return {
-        "predicao_100k": pred_100k,
-        "predicao_usd": pred_usd,
-        "intervalo_lower": lower,
-        "intervalo_upper": upper,
-        "alerta_teto": alertas.tolist(),
-        "mensagem_alerta": mensagens,
-        "alerta_teto_ic": alertas_ic.tolist(),
-        "mensagem_alerta_ic": mensagens_ic,
-    }
+    return ResultadoPredicao(
+        predicao_100k=pred_100k,
+        predicao_usd=pred_usd,
+        intervalo_lower=lower,
+        intervalo_upper=upper,
+        alerta_teto=alertas.tolist(),
+        mensagem_alerta=mensagens,
+        alerta_teto_ic=alertas_ic.tolist(),
+        mensagem_alerta_ic=mensagens_ic,
+    )
 
 
 if __name__ == "__main__":
