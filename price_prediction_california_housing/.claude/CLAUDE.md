@@ -65,8 +65,10 @@ do projeto. Pendências pós-aprovação ficam no backlog do banco MCP.
 - Modelo: XGBoost, vencedor da competição de 5 modelos em `notebooks/model_competition.ipynb`
   (hold-out: R²=0.87, RMSE=0.433, MAE=0.270).
 - Explicabilidade: SHAP — RendaMediana é o driver principal, seguido de Latitude/Longitude.
-- Fairness: Sul Costa e Norte Interior abaixo das metas por limitação estrutural do
-  dataset (truncamento e sub-representação) — documentado no README.
+- Fairness: 5 regiões (3 metrópoles + "Demais" Norte/Sul, `reports/regions.py`). Sem
+  evidência de diferença entre as metrópoles; fora delas o MAPE é maior (~18% vs 13–14%,
+  IC sem sobreposição). Diferença de RMSE $10.4k com IC 95% [$6.7k, $19.9k] e faixa de
+  $10–17k conforme os raios — não dá para afirmar que passa no limiar de $15k. Documentado no README.
 - MLflow: `mlflow.db`, modelo registrado `california-housing-xgboost` v1.
 - Inferência: `src/predict.py` com IC conformal e alerta de teto ($450k).
 
@@ -137,6 +139,7 @@ e deve ser visível para qualquer pessoa que visitar o repositório.
 | 2026-09-11 | Ciclo CRISP-DM formalmente encerrado — veredicto Aprovado | Segunda passada do CDS confirmou as 5 ressalvas de 2026-05-24 resolvidas pelo backlog de 2026-05-28; deploy fica pendente de avaliação própria do dono do projeto | chief_data_scientist |
 | 2026-10-28 | Features `dist_sf/dist_la/dist_sd` mantidas | Ablation (4 variantes × 5 seeds, IC bootstrap): sem elas o RMSE piora 7.2%, fora do ruído — não são redundantes apesar de colineares com Lat/Long; SHAP deve ser lido por grupo (geo ≈ 56%) | modelagem |
 | 2026-10-28 | Pipeline salvo com classes de `src.transformers` e `device=cpu` | Pickle com classes em `__main__` quebrava `from src.predict import prever`; treino segue em GPU, `device` trocado antes do `joblib.dump` | mlops |
+| 2026-10-30 | Fairness por regiões metropolitanas, não por quadrantes de mediana (substitui a decisão de 2026-05-24) | Lat/Long têm correlação −0.92: os quadrantes geravam 2 cantos (~2% cada) com nomes errados ("Sul Costa" não continha LA nem SD) e os alertas vinham do recorte. Com regiões por distância às metrópoles, os resultados são reportados com IC bootstrap e sensibilidade aos raios — o MAPE fora das metrópoles é o achado robusto | avaliacao |
 
 ---
 

@@ -186,6 +186,12 @@ Sul Costa (LA / San Diego) concentra 3.3× mais truncamentos que a média. Aliad
 sub-representação (2.3% das amostras), isso explica o RMSE elevado nessa região —
 qualquer modelo treinado neste dataset terá o mesmo comportamento. Ver `reports/truncation_analysis.py`.
 
+> **Correção posterior:** os quadrantes por mediana acima não correspondem aos nomes
+> (o centro de LA e San Diego caem em "Sul Interior"; "Sul Costa" é a faixa de Malibu a
+> Thousand Oaks), porque latitude e longitude têm correlação de −0.92. O recorte foi
+> substituído por regiões metropolitanas (`reports/regions.py`) — números atuais na seção
+> "Truncamento do target" e "Fairness geográfica" do README.
+
 ---
 
 ### 4.3 Factory de Pipelines
