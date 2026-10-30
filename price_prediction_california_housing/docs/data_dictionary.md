@@ -109,6 +109,7 @@ Criadas apenas nos scripts de `reports/` para avaliação, fairness e diagnósti
 |---|---|---|---|
 | `regiao` | `reports/regions.py` (usada por `reports/fairness_geo.py` e `reports/truncation_analysis.py`) | Distância haversine ao centro da cidade, regras aplicadas em ordem: `bay_area` (≤ 80 km de SF), `grande_la` (≤ 80 km de LA), `san_diego` (≤ 50 km de SD); o restante vira `demais_norte` (latitude ≥ 35.5°) ou `demais_sul` (latitude < 35.5°) | Grupo sensível para fairness — RMSE, MAE, R² e MAPE segmentados por região, com IC 95% bootstrap de RMSE e MAPE (`reports/fairness_geo.csv`) e sensibilidade aos raios (`reports/fairness_geo_sensitivity.csv`) |
 | `residuals` | `reports/residuals.py` | `y_true − y_pred` na escala original ($100k) | Diagnóstico de heterocedasticidade, normalidade (Q-Q) e erro por decil |
+| faixa de preço | `reports/conformal_coverage.py` (`price_band`) | Valor em $100k cortado em < 1, 1–2, 2–3, 3–4.5 e ≥ 4.5 — aplicado à predição (`faixa_prevista`) e ao valor real (`faixa_real`) | Cobertura e largura do IC conformal por faixa (`reports/conformal_coverage.csv`), comparando o `q_hat` global com o Mondrian avaliado |
 | máscara de truncamento | `reports/truncation_analysis.py` | `MedHouseVal >= 4.999` (`TRUNCATION_THRESHOLD`) — o limiar 4.999 captura o float `5.000010` do dataset, que `== 5.0` não pega | Concentração do teto por região — maior na Bay Area (8.3%) |
 
 ---

@@ -159,6 +159,7 @@ predições erradas silenciosamente (ver histórico de decisões).
 │   ├── regions.py                         # Definição das regiões geográficas (fairness e truncamento)
 │   ├── fairness_geo.py                    # Gera análise de fairness geográfica
 │   ├── truncation_analysis.py             # Concentração do teto de $500k por região
+│   ├── conformal_coverage.py              # Cobertura do IC conformal por região e faixa de preço
 │   ├── residuals.py                       # Gera análise de resíduos
 │   ├── ablation_dist_features.py          # Ablation das features de distância (+ .csv/.txt/_shap.png)
 │   ├── shap_summary_plot.png
@@ -196,6 +197,7 @@ jupyter nbconvert --to notebook --execute notebooks/model_competition.ipynb
 # Análise de fairness geográfica
 .venv\Scripts\python reports\fairness_geo.py
 .venv\Scripts\python reports\truncation_analysis.py
+.venv\Scripts\python reports\conformal_coverage.py
 
 # Análise de resíduos
 .venv\Scripts\python reports\residuals.py
@@ -253,6 +255,35 @@ $500k, não porque acertou, mas porque o valor real foi censurado. Por isso, o I
 ser **ligeiramente estreito para imóveis próximos ao teto**: a cobertura de 80.55% é
 válida para a distribuição do dataset, mas pode ser menor para imóveis genuinamente
 acima de $500k.
+
+### Cobertura condicional do intervalo
+
+A cobertura de 80.55% é **marginal**: vale para o conjunto de teste como um todo. Como o
+`q_hat` é único e a largura do intervalo é constante na escala log, a cobertura muda com
+a faixa de preço (`reports/conformal_coverage.py`, IC 95% de Wilson, test set):
+
+| Predição | n | Cobertura do IC 80% | Cobertura do IC 95% |
+|----------|---|---------------------|---------------------|
+| < $100k | 610 | 87.0% | 97.7% |
+| $100–200k | 1.772 | 82.4% | 95.4% |
+| $200–300k | 1.077 | **75.4% ⚠️** [72.7, 77.9] | **92.5% ⚠️** |
+| $300–450k | 551 | **73.5% ⚠️** [69.7, 77.0] | 93.3% |
+| ≥ $450k | 118 | 98.3% | 99.2% |
+
+**Na faixa de $200k a $450k, o intervalo de 80% acerta só ~74% das vezes** — é mais
+estreito do que deveria. Abaixo de $100k é mais largo do que precisa. Por região, a
+cobertura do IC 80% fica entre 77.1% (Demais — Sul) e 82.7% (Grande LA), sem região com o
+IC inteiro abaixo de 80%. Para imóveis com valor real acima de $450k a cobertura cai para
+~60%, por causa do truncamento (o valor verdadeiro é desconhecido) — o `alerta_teto_ic`
+sinaliza esses casos.
+
+> **Alternativa avaliada e descartada — conformal por faixa (Mondrian):** um `q_hat` por
+> faixa de predição leva todas as faixas a ~80%, mas (1) derruba as regiões fora das
+> metrópoles para ~75%, com o IC inteiro abaixo de 80% — elas concentram imóveis baratos,
+> que recebem `q_hat` menor; e (2) estreita pela metade o intervalo da faixa ≥ $450k
+> (`q_hat` 0.062 contra 0.133), justamente onde o valor real foi censurado. Corrigir um
+> recorte desequilibra o outro, e a produção segue com o `q_hat` global. A comparação
+> completa está em `reports/conformal_coverage.csv` e `reports/conformal_coverage_by_band.png`.
 
 ### Fairness geográfica
 

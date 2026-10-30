@@ -71,6 +71,8 @@ do projeto. Pendências pós-aprovação ficam no backlog do banco MCP.
   $10–17k conforme os raios — não dá para afirmar que passa no limiar de $15k. Documentado no README.
 - MLflow: `mlflow.db`, modelo registrado `california-housing-xgboost` v1.
 - Inferência: `src/predict.py` com IC conformal e alerta de teto ($450k).
+- IC conformal: cobertura marginal 80.55%, mas ~74% entre $200k e $450k previstos
+  (`reports/conformal_coverage.py`); Mondrian por faixa avaliado e descartado — documentado no README.
 
 ---
 
